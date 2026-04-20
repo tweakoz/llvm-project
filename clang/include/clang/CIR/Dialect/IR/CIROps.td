@@ -854,7 +854,8 @@ def CIR_ReturnOp : CIR_Op<"return", [
 
 def CIR_IfOp : CIR_Op<"if", [
   DeclareOpInterfaceMethods<RegionBranchOpInterface, ["getSuccessorInputs"]>,
-  RecursivelySpeculatable, AutomaticAllocationScope, NoRegionArguments
+  RecursivelySpeculatable, AutomaticAllocationScope, NoRegionArguments,
+  ImplicitDefaultTerminator<"cir::YieldOp">
 ]> {
   let summary = "the if-then-else operation";
   let description = [{
@@ -874,19 +875,11 @@ def CIR_IfOp : CIR_Op<"if", [
     cir.if %cond  {
       ...
     }
-
-    cir.if %cond  {
-      ...
-      cir.br ^a
-    ^a:
-      cir.yield
-    }
     ```
 
     `cir.if` defines no values and the 'else' can be omitted. The if/else
     regions must be terminated. If the region has only one block, the terminator
-    can be left out, and `cir.yield` terminator will be inserted implictly.
-    Otherwise, the region must be explicitly terminated.
+    can be left out, and `cir.yield` terminator will be inserted implicitly.
   }];
   let arguments = (ins CIR_BoolType:$condition);
   let regions = (region AnyRegion:$thenRegion, AnyRegion:$elseRegion);
@@ -1140,7 +1133,8 @@ def CIR_ResumeFlatOp : CIR_Op<"resume.flat", [
 def CIR_ScopeOp : CIR_Op<"scope", [
   DeclareOpInterfaceMethods<RegionBranchOpInterface, ["getSuccessorInputs"]>,
   RecursivelySpeculatable, AutomaticAllocationScope, NoRegionArguments,
-  RecursiveMemoryEffects
+  RecursiveMemoryEffects,
+  ImplicitDefaultTerminator<"cir::YieldOp">
 ]> {
   let summary = "Represents a C/C++ scope";
   let description = [{
@@ -1171,7 +1165,7 @@ def CIR_ScopeOp : CIR_Op<"scope", [
   let hasVerifier = 1;
   let skipDefaultBuilders = 1;
   let assemblyFormat = [{
-    custom<OmittedTerminatorRegion>($scopeRegion) (`:` type($results)^)? attr-dict
+    $scopeRegion (`:` type($results)^)? attr-dict
   }];
 
   let extraClassDeclaration = [{
@@ -1242,7 +1236,8 @@ def CIR_CleanupKindAttr : CIR_EnumAttr<CIR_CleanupKind, "cleanup_kind"> {
 def CIR_CleanupScopeOp : CIR_Op<"cleanup.scope", [
   DeclareOpInterfaceMethods<RegionBranchOpInterface, ["getSuccessorInputs"]>,
   RecursivelySpeculatable, AutomaticAllocationScope, NoRegionArguments,
-  RecursiveMemoryEffects
+  RecursiveMemoryEffects,
+  ImplicitDefaultTerminator<"cir::YieldOp">
 ]> {
   let summary = "Represents a scope with associated cleanup code";
   let description = [{

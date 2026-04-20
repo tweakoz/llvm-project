@@ -74,11 +74,9 @@ void vla_expr_element_type_of_size_1() {
 // CIR: cir.cleanup.scope {
 // CIR:   %[[ARR_ADDR:.*]] = cir.alloca !cir.bool, !cir.ptr<!cir.bool>, %[[TMP_N]] : !u64i, ["arr"]
 // CIR:   cir.store {{.*}} %[[TMP_N]], %[[SIZE_ADDR]] : !u64i, !cir.ptr<!u64i>
-// CIR:   cir.yield
 // CIR: } cleanup normal {
 // CIR:   %[[TMP_SAVED_STACK:.*]] = cir.load {{.*}} %[[SAVED_STACK_ADDR]] : !cir.ptr<!cir.ptr<!u8i>>, !cir.ptr<!u8i>
 // CIR:   cir.stackrestore %[[TMP_SAVED_STACK]] : !cir.ptr<!u8i>
-// CIR:   cir.yield
 // CIR: }
 
 // LLVM: %[[N_ADDR:.*]] = alloca i64, i64 1, align 8
@@ -128,11 +126,9 @@ void vla_expr_element_type_int() {
 // CIR:   %[[CONST_4:.*]] = cir.const #cir.int<4> : !u64i
 // CIR:   %[[SIZE:.*]] = cir.mul nuw %[[CONST_4]], %[[TMP_N]] : !u64i
 // CIR:   cir.store {{.*}} %[[SIZE]], %[[SIZE_ADDR]] : !u64i, !cir.ptr<!u64i>
-// CIR:   cir.yield
 // CIR: } cleanup normal {
 // CIR:   %[[TMP_SAVED_STACK:.*]] = cir.load {{.*}} %[[SAVED_STACK_ADDR]] : !cir.ptr<!cir.ptr<!u8i>>, !cir.ptr<!u8i>
 // CIR:   cir.stackrestore %[[TMP_SAVED_STACK]] : !cir.ptr<!u8i>
-// CIR:   cir.yield
 // CIR: }
 
 // LLVM: %[[N_ADDR:.*]] = alloca i64, i64 1, align 8

@@ -350,7 +350,7 @@ struct OperationFormat {
     resultTypes.resize(op.getNumResults(), TypeResolution());
 
     hasImplicitTermTrait = llvm::any_of(op.getTraits(), [](const Trait &trait) {
-      return trait.getDef().isSubClassOf("SingleBlockImplicitTerminatorImpl");
+      return trait.getDef().isSubClassOf("ImplicitDefaultTerminatorImpl");
     });
 
     hasSingleBlockTrait = op.getTrait("::mlir::OpTrait::SingleBlock");
@@ -393,8 +393,7 @@ struct OperationFormat {
   /// A flag indicating if this operation infers its result types
   bool infersResultTypes = false;
 
-  /// A flag indicating if this operation has the SingleBlockImplicitTerminator
-  /// trait.
+  /// A flag indicating if this operation has an implicit terminator trait.
   bool hasImplicitTermTrait;
 
   /// A flag indicating if this operation has the SingleBlock trait.
@@ -1951,14 +1950,15 @@ void OperationFormat::genParserVariadicSegmentResolution(Operator &op,
 //===----------------------------------------------------------------------===//
 
 /// The code snippet used to generate a printer call for a region of an
-// operation that has the SingleBlockImplicitTerminator trait.
+/// operation that has an implicit terminator trait.
 ///
 /// {0}: The name of the region.
-static const char *regionSingleBlockImplicitTerminatorPrinterCode = R"(
+static const char *regionImplicitTerminatorPrinterCode = R"(
   {
     bool printTerminator = true;
     if (auto *term = {0}.empty() ? nullptr : {0}.begin()->getTerminator()) {{
-      printTerminator = !term->getAttrDictionary().empty() ||
+      printTerminator = !::mlir::isa<ImplicitTerminatorOpT>(*term) ||
+                        !term->getAttrDictionary().empty() ||
                         term->getNumOperands() != 0 ||
                         term->getNumResults() != 0;
     }
@@ -2220,7 +2220,7 @@ static void genCustomDirectivePrinter(CustomDirective *customDir,
 static void genRegionPrinter(const Twine &regionName, MethodBody &body,
                              bool hasImplicitTermTrait) {
   if (hasImplicitTermTrait)
-    body << formatv(regionSingleBlockImplicitTerminatorPrinterCode, regionName);
+    body << formatv(regionImplicitTerminatorPrinterCode, regionName);
   else
     body << "  _odsPrinter.printRegion(" << regionName << ");\n";
 }

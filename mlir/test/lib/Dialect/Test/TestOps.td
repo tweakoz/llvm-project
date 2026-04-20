@@ -895,6 +895,11 @@ def SingleBlockImplicitTerminatorOp : TEST_Op<"SingleBlockImplicitTerminator",
     [SingleBlockImplicitTerminator<"TerminatorOp">]> {
   let regions = (region SizedRegion<1>:$region);
 }
+def SingleBlockImplicitDefaultTerminatorOp
+    : TEST_Op<"SingleBlockImplicitDefaultTerminator",
+              [SingleBlockImplicitDefaultTerminator<"TerminatorOp">]> {
+  let regions = (region SizedRegion<1>:$region);
+}
 
 def I32ElementsAttrOp : TEST_Op<"i32ElementsAttr"> {
   let arguments = (ins I32ElementsAttr:$attr);

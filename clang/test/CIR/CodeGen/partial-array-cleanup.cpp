@@ -39,13 +39,11 @@ void test_partial_array_cleanup() {
 // CIR:           %[[CONST1:.*]] = cir.const #cir.int<1> : !u64i
 // CIR:           %[[NEXT:.*]] = cir.ptr_stride %[[CUR]], %[[CONST1]] : (!cir.ptr<!rec_S>, !u64i) -> !cir.ptr<!rec_S>
 // CIR:           cir.store %[[NEXT]], %[[ITER]] : !cir.ptr<!rec_S>, !cir.ptr<!cir.ptr<!rec_S>>
-// CIR:           cir.yield
 // CIR:         } while {
 // CIR:           %[[CUR2:.*]] = cir.load %[[ITER]] : !cir.ptr<!cir.ptr<!rec_S>>, !cir.ptr<!rec_S>
 // CIR:           %[[CMP:.*]] = cir.cmp ne %[[CUR2]], %[[END]] : !cir.ptr<!rec_S>
 // CIR:           cir.condition(%[[CMP]])
 // CIR:         }
-// CIR:         cir.yield
 // CIR:       } cleanup eh {
 // CIR:         %[[CUR3:.*]] = cir.load %[[ITER]] : !cir.ptr<!cir.ptr<!rec_S>>, !cir.ptr<!rec_S>
 // CIR:         %[[NE:.*]] = cir.cmp ne %[[CUR3]], %[[BEGIN]] : !cir.ptr<!rec_S>
@@ -56,14 +54,12 @@ void test_partial_array_cleanup() {
 // CIR:             %[[PREV:.*]] = cir.ptr_stride %[[EL]], %[[NEG1]] : (!cir.ptr<!rec_S>, !s64i) -> !cir.ptr<!rec_S>
 // CIR:             cir.store %[[PREV]], %[[ITER]] : !cir.ptr<!rec_S>, !cir.ptr<!cir.ptr<!rec_S>>
 // CIR:             cir.call @_ZN1SD1Ev(%[[PREV]]){{.*}} : (!cir.ptr<!rec_S>{{.*}}) -> ()
-// CIR:             cir.yield
 // CIR:           } while {
 // CIR:             %[[EL2:.*]] = cir.load %[[ITER]] : !cir.ptr<!cir.ptr<!rec_S>>, !cir.ptr<!rec_S>
 // CIR:             %[[NE2:.*]] = cir.cmp ne %[[EL2]], %[[BEGIN]] : !cir.ptr<!rec_S>
 // CIR:             cir.condition(%[[NE2]])
 // CIR:           }
 // CIR:         }
-// CIR:         cir.yield
 // CIR:       }
 
 // LLVM:     define dso_local void @_Z26test_partial_array_cleanupv()
@@ -179,7 +175,6 @@ void test_variable_size_partial_array_cleanup(int n) {
 // CIR-BEFORE-LPP:           cir.call @_ZN1SD1Ev(%[[DTOR_ARG]]){{.*}} : (!cir.ptr<!rec_S>{{.*}}) -> ()
 // CIR-BEFORE-LPP:         }
 // CIR-BEFORE-LPP:         cir.cleanup.scope {
-// CIR-BEFORE-LPP:           cir.yield
 // CIR-BEFORE-LPP:         } cleanup all {
 // CIR-BEFORE-LPP:           cir.array.dtor %[[VLA]], %[[N]] : !cir.ptr<!rec_S>, !u64i {
 // CIR-BEFORE-LPP:           ^bb0(%[[DTOR_ARG2:.*]]: !cir.ptr<!rec_S>):
@@ -211,13 +206,11 @@ void test_variable_size_partial_array_cleanup(int n) {
 // CIR:               %[[CONST1:.*]] = cir.const #cir.int<1> : !u64i
 // CIR:               %[[NEXT:.*]] = cir.ptr_stride %[[CUR]], %[[CONST1]] : (!cir.ptr<!rec_S>, !u64i) -> !cir.ptr<!rec_S>
 // CIR:               cir.store %[[NEXT]], %[[ITER]] : !cir.ptr<!rec_S>, !cir.ptr<!cir.ptr<!rec_S>>
-// CIR:               cir.yield
 // CIR:             } while {
 // CIR:               %[[CUR2:.*]] = cir.load %[[ITER]] : !cir.ptr<!cir.ptr<!rec_S>>, !cir.ptr<!rec_S>
 // CIR:               %[[CMP:.*]] = cir.cmp ne %[[CUR2]], %[[END]] : !cir.ptr<!rec_S>
 // CIR:               cir.condition(%[[CMP]])
 // CIR:             }
-// CIR:             cir.yield
 // CIR:           } cleanup eh {
 // CIR:             %[[CUR3:.*]] = cir.load %[[ITER]] : !cir.ptr<!cir.ptr<!rec_S>>, !cir.ptr<!rec_S>
 // CIR:             %[[NE:.*]] = cir.cmp ne %[[CUR3]], %[[BEGIN]] : !cir.ptr<!rec_S>
@@ -228,14 +221,12 @@ void test_variable_size_partial_array_cleanup(int n) {
 // CIR:                 %[[PREV:.*]] = cir.ptr_stride %[[EL]], %[[NEG1]] : (!cir.ptr<!rec_S>, !s64i) -> !cir.ptr<!rec_S>
 // CIR:                 cir.store %[[PREV]], %[[ITER]] : !cir.ptr<!rec_S>, !cir.ptr<!cir.ptr<!rec_S>>
 // CIR:                 cir.call @_ZN1SD1Ev(%[[PREV]]){{.*}} : (!cir.ptr<!rec_S>{{.*}}) -> ()
-// CIR:                 cir.yield
 // CIR:               } while {
 // CIR:                 %[[EL2:.*]] = cir.load %[[ITER]] : !cir.ptr<!cir.ptr<!rec_S>>, !cir.ptr<!rec_S>
 // CIR:                 %[[NE2:.*]] = cir.cmp ne %[[EL2]], %[[BEGIN]] : !cir.ptr<!rec_S>
 // CIR:                 cir.condition(%[[NE2]])
 // CIR:               }
 // CIR:             }
-// CIR:             cir.yield
 // CIR:           }
 // CIR:         }
 //
@@ -252,19 +243,15 @@ void test_variable_size_partial_array_cleanup(int n) {
 // CIR:               %[[DTOR_PREV:.*]] = cir.ptr_stride %[[DTOR_CUR]], %[[DTOR_NEG1]] : (!cir.ptr<!rec_S>, !s64i) -> !cir.ptr<!rec_S>
 // CIR:               cir.store %[[DTOR_PREV]], %[[DTOR_ITER]] : !cir.ptr<!rec_S>, !cir.ptr<!cir.ptr<!rec_S>>
 // CIR:               cir.call @_ZN1SD1Ev(%[[DTOR_PREV]]){{.*}} : (!cir.ptr<!rec_S>{{.*}}) -> ()
-// CIR:               cir.yield
 // CIR:             } while {
 // CIR:               %[[DTOR_CUR2:.*]] = cir.load %[[DTOR_ITER]] : !cir.ptr<!cir.ptr<!rec_S>>, !cir.ptr<!rec_S>
 // CIR:               %[[DTOR_NE2:.*]] = cir.cmp ne %[[DTOR_CUR2]], %[[BEGIN]] : !cir.ptr<!rec_S>
 // CIR:               cir.condition(%[[DTOR_NE2]])
 // CIR:             }
 // CIR:           }
-// CIR:           cir.yield
 // CIR:         }
-// CIR:         cir.yield
 // CIR:       } cleanup normal {
 // CIR:         cir.stackrestore {{.*}} : !cir.ptr<!u8i>
-// CIR:         cir.yield
 // CIR:       }
 
 // LLVM:     define dso_local void @_Z40test_variable_size_partial_array_cleanupi
@@ -456,7 +443,6 @@ void test_multi_dim_vla(int n, int m) {
 // CIR-BEFORE-LPP:           cir.call @_ZN1SD1Ev(%[[DTOR_ARG]]){{.*}} : (!cir.ptr<!rec_S>{{.*}}) -> ()
 // CIR-BEFORE-LPP:         }
 // CIR-BEFORE-LPP:         cir.cleanup.scope {
-// CIR-BEFORE-LPP:           cir.yield
 // CIR-BEFORE-LPP:         } cleanup all {
 // CIR-BEFORE-LPP:           cir.array.dtor %[[VLA]], {{.*}} : !cir.ptr<!rec_S>, !u64i {
 // CIR-BEFORE-LPP:           ^bb0(%[[DTOR_ARG2:.*]]: !cir.ptr<!rec_S>):
@@ -569,7 +555,6 @@ void test_vla_of_constant_array(int n) {
 // CIR-BEFORE-LPP:           cir.call @_ZN1SD1Ev(%[[DTOR_ARG]]){{.*}} : (!cir.ptr<!rec_S>{{.*}}) -> ()
 // CIR-BEFORE-LPP:         }
 // CIR-BEFORE-LPP:         cir.cleanup.scope {
-// CIR-BEFORE-LPP:           cir.yield
 // CIR-BEFORE-LPP:         } cleanup all {
 // CIR-BEFORE-LPP:           %{{.*}} = cir.const #cir.int<4> : !u64i
 // CIR-BEFORE-LPP:           %{{.*}} = cir.mul nuw %[[N]], %{{.*}} : !u64i
@@ -685,11 +670,9 @@ void test_init_list_partial_array_cleanup() {
 // CIR:           cir.call @_ZN1SC1Ev(%[[CUR]])
 // CIR:           %[[NEXT:.*]] = cir.ptr_stride %[[CUR]], %{{.*}}
 // CIR:           cir.store {{.*}} %[[NEXT]], %[[END_OF_INIT]]
-// CIR:           cir.yield
 // CIR:         } while {
 // CIR:           cir.condition(%{{.*}})
 // CIR:         }
-// CIR:         cir.yield
 //              --- EH cleanup: partial destruction ---
 // CIR:       } cleanup eh {
 // CIR:         %[[END_VAL:.*]] = cir.load {{.*}} %[[END_OF_INIT]] : !cir.ptr<!cir.ptr<!rec_S>>, !cir.ptr<!rec_S>
@@ -700,14 +683,12 @@ void test_init_list_partial_array_cleanup() {
 // CIR:             %[[NEG1:.*]] = cir.const #cir.int<-1> : !s64i
 // CIR:             %[[PREV:.*]] = cir.ptr_stride %[[EL]], %[[NEG1]] : (!cir.ptr<!rec_S>, !s64i) -> !cir.ptr<!rec_S>
 // CIR:             cir.call @_ZN1SD1Ev(%[[PREV]])
-// CIR:             cir.yield
 // CIR:           } while {
 // CIR:             %[[EL2:.*]] = cir.load {{.*}} %{{.*}} : !cir.ptr<!cir.ptr<!rec_S>>, !cir.ptr<!rec_S>
 // CIR:             %[[NE2:.*]] = cir.cmp ne %[[EL2]], %[[BEGIN]] : !cir.ptr<!rec_S>
 // CIR:             cir.condition(%[[NE2]])
 // CIR:           }
 // CIR:         }
-// CIR:         cir.yield
 // CIR:       }
 
 // LLVM-LABEL:  define dso_local void @_Z36test_init_list_partial_array_cleanupv()

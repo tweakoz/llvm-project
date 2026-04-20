@@ -955,76 +955,183 @@ public:
 };
 
 //===----------------------------------------------------------------------===//
-// SingleBlockImplicitTerminator
+// Implicit Terminator Traits
 //===----------------------------------------------------------------------===//
 
-/// This class provides APIs and verifiers for ops with regions having a single
-/// block that must terminate with `TerminatorOpType`.
+namespace detail {
+/// Shared base for implicit-terminator traits. Provides `ensureTerminator`,
+/// `ImplicitTerminatorOpT`, the terminator builder, and a common verification
+/// loop. Not a trait itself -- mixed into trait Impl classes via multiple
+/// inheritance.
 template <typename TerminatorOpType>
-struct SingleBlockImplicitTerminator {
-  template <typename ConcreteType>
-  class Impl : public TraitBase<ConcreteType, SingleBlockImplicitTerminator<
-                                                  TerminatorOpType>::Impl> {
-  private:
-    /// Builds a terminator operation without relying on OpBuilder APIs to avoid
-    /// cyclic header inclusion.
-    static Operation *buildTerminator(OpBuilder &builder, Location loc) {
-      OperationState state(loc, TerminatorOpType::getOperationName());
-      TerminatorOpType::build(builder, state);
-      return Operation::create(state);
-    }
+struct ImplicitTerminatorBase {
+  using ImplicitTerminatorOpT = TerminatorOpType;
 
-  public:
-    /// The type of the operation used as the implicit terminator type.
-    using ImplicitTerminatorOpT = TerminatorOpType;
-
-    static LogicalResult verifyRegionTrait(Operation *op) {
-      for (unsigned i = 0, e = op->getNumRegions(); i < e; ++i) {
-        Region &region = op->getRegion(i);
-        // Empty regions are fine.
-        if (region.empty())
+  /// Verify that every non-empty block in every region satisfies `check`.
+  /// `check(op, regionIdx, terminator)` should return failure() with a
+  /// diagnostic if the block's terminator is unacceptable.
+  template <typename CheckFn>
+  static LogicalResult verifyRegionTerminators(Operation *op, CheckFn check) {
+    for (unsigned i = 0, e = op->getNumRegions(); i < e; ++i) {
+      Region &region = op->getRegion(i);
+      for (Block &block : region) {
+        if (block.empty())
           continue;
-        Operation &terminator = region.front().back();
-        if (isa<TerminatorOpType>(terminator))
-          continue;
-
-        return op->emitOpError("expects regions to end with '" +
-                               TerminatorOpType::getOperationName() +
-                               "', found '" +
-                               terminator.getName().getStringRef() + "'")
-                   .attachNote()
-               << "in custom textual format, the absence of terminator implies "
-                  "'"
-               << TerminatorOpType::getOperationName() << '\'';
+        if (failed(check(op, i, block.back())))
+          return failure();
       }
-
-      return success();
     }
+    return success();
+  }
 
-    /// Ensure that the given region has the terminator required by this trait.
-    /// If OpBuilder is provided, use it to build the terminator and notify the
-    /// OpBuilder listeners accordingly. If only a Builder is provided, locally
-    /// construct an OpBuilder with no listeners; this should only be used if no
-    /// OpBuilder is available at the call site, e.g., in the parser.
-    static void ensureTerminator(Region &region, Builder &builder,
-                                 Location loc) {
-      ::mlir::impl::ensureRegionTerminator(region, builder, loc,
-                                           buildTerminator);
-    }
-    static void ensureTerminator(Region &region, OpBuilder &builder,
-                                 Location loc) {
-      ::mlir::impl::ensureRegionTerminator(region, builder, loc,
-                                           buildTerminator);
+  /// Ensure that the given region has the terminator required by this trait.
+  /// If OpBuilder is provided, use it to build the terminator and notify the
+  /// OpBuilder listeners accordingly. If only a Builder is provided, locally
+  /// construct an OpBuilder with no listeners; this should only be used if no
+  /// OpBuilder is available at the call site, e.g., in the parser.
+  static void ensureTerminator(Region &region, Builder &builder, Location loc) {
+    ::mlir::impl::ensureRegionTerminator(region, builder, loc, buildTerminator);
+  }
+  static void ensureTerminator(Region &region, OpBuilder &builder,
+                               Location loc) {
+    ::mlir::impl::ensureRegionTerminator(region, builder, loc, buildTerminator);
+  }
+
+private:
+  static Operation *buildTerminator(OpBuilder &builder, Location loc) {
+    OperationState state(loc, TerminatorOpType::getOperationName());
+    TerminatorOpType::build(builder, state);
+    return Operation::create(state);
+  }
+};
+} // namespace detail
+
+/// Ops where any `IsTerminator` op is accepted. `TerminatorOpType` is inserted
+/// as the default when a block has no terminator, and is omitted from the
+/// textual format. Does not enforce SingleBlock.
+template <typename TerminatorOpType>
+struct ImplicitDefaultTerminator {
+  template <typename ConcreteType>
+  class Impl
+      : public TraitBase<ConcreteType,
+                         ImplicitDefaultTerminator<TerminatorOpType>::Impl>,
+        public detail::ImplicitTerminatorBase<TerminatorOpType> {
+  public:
+    static LogicalResult verifyRegionTrait(Operation *op) {
+      return detail::ImplicitTerminatorBase<TerminatorOpType>::
+          verifyRegionTerminators(
+              op,
+              [](Operation *op, unsigned i, Operation &term) -> LogicalResult {
+                if (term.hasTrait<OpTrait::IsTerminator>())
+                  return success();
+                return op->emitOpError("expects region #")
+                       << i << " to end with a terminator";
+              });
     }
   };
 };
 
-/// Check is an op defines the `ImplicitTerminatorOpT` member. This is intended
+/// Ops whose regions must terminate with `TerminatorOpType`. Does not enforce
+/// SingleBlock.
+template <typename TerminatorOpType>
+struct ImplicitTerminator {
+  template <typename ConcreteType>
+  class Impl : public TraitBase<ConcreteType,
+                                ImplicitTerminator<TerminatorOpType>::Impl>,
+               public detail::ImplicitTerminatorBase<TerminatorOpType> {
+  public:
+    static LogicalResult verifyRegionTrait(Operation *op) {
+      return detail::ImplicitTerminatorBase<TerminatorOpType>::
+          verifyRegionTerminators(
+              op,
+              [](Operation *op, unsigned i, Operation &term) -> LogicalResult {
+                if (isa<TerminatorOpType>(term))
+                  return success();
+                return op->emitOpError("expects regions to end with '" +
+                                       TerminatorOpType::getOperationName() +
+                                       "', found '" +
+                                       term.getName().getStringRef() + "'")
+                           .attachNote()
+                       << "in custom textual format, the absence of terminator "
+                          "implies '"
+                       << TerminatorOpType::getOperationName() << '\'';
+              });
+    }
+  };
+};
+
+/// Same as ImplicitDefaultTerminator but also enforces SingleBlock via the
+/// TraitList in TableGen.
+template <typename TerminatorOpType>
+struct SingleBlockImplicitDefaultTerminator {
+  template <typename ConcreteType>
+  class Impl
+      : public TraitBase<ConcreteType, SingleBlockImplicitDefaultTerminator<
+                                           TerminatorOpType>::Impl>,
+        public detail::ImplicitTerminatorBase<TerminatorOpType> {
+  public:
+    static LogicalResult verifyRegionTrait(Operation *op) {
+      return detail::ImplicitTerminatorBase<TerminatorOpType>::
+          verifyRegionTerminators(
+              op,
+              [](Operation *op, unsigned i, Operation &term) -> LogicalResult {
+                if (term.hasTrait<OpTrait::IsTerminator>())
+                  return success();
+                return op->emitOpError("expects region #")
+                       << i << " to end with a terminator";
+              });
+    }
+  };
+};
+
+/// Ops with single-block regions that must terminate with `TerminatorOpType`.
+template <typename TerminatorOpType>
+struct SingleBlockImplicitTerminator {
+  template <typename ConcreteType>
+  class Impl
+      : public TraitBase<ConcreteType,
+                         SingleBlockImplicitTerminator<TerminatorOpType>::Impl>,
+        public detail::ImplicitTerminatorBase<TerminatorOpType> {
+  public:
+    static LogicalResult verifyRegionTrait(Operation *op) {
+      return detail::ImplicitTerminatorBase<TerminatorOpType>::
+          verifyRegionTerminators(
+              op,
+              [](Operation *op, unsigned i, Operation &term) -> LogicalResult {
+                if (isa<TerminatorOpType>(term))
+                  return success();
+                return op->emitOpError("expects regions to end with '" +
+                                       TerminatorOpType::getOperationName() +
+                                       "', found '" +
+                                       term.getName().getStringRef() + "'")
+                           .attachNote()
+                       << "in custom textual format, the absence of terminator "
+                          "implies '"
+                       << TerminatorOpType::getOperationName() << '\'';
+              });
+    }
+  };
+};
+
+/// Check if an op defines the `ImplicitTerminatorOpT` member. This is intended
 /// to be used with `llvm::is_detected`.
 template <class T>
 using has_implicit_terminator_t = typename T::ImplicitTerminatorOpT;
 
-/// Support to check if an operation has the SingleBlockImplicitTerminator
+/// Check if an operation has any implicit-terminator trait
+/// (ImplicitDefaultTerminator, ImplicitTerminator,
+/// SingleBlockImplicitDefaultTerminator, or SingleBlockImplicitTerminator).
+template <class Op, bool hasTerminator =
+                        llvm::is_detected<has_implicit_terminator_t, Op>::value>
+struct hasImplicitTerminator {
+  static constexpr bool value = true;
+};
+template <class Op>
+struct hasImplicitTerminator<Op, false> {
+  static constexpr bool value = false;
+};
+
+/// Check if an operation specifically has the SingleBlockImplicitTerminator
 /// trait. We can't just use `hasTrait` because this class is templated on a
 /// specific terminator op.
 template <class Op, bool hasTerminator =

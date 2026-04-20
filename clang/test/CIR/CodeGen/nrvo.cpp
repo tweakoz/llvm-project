@@ -81,7 +81,6 @@ NonTrivial test_nrvo() {
 // CIR:     cir.if %[[NOT_NRVO_VAL]] {
 // CIR:       cir.call @_ZN10NonTrivialD1Ev(%[[RESULT]])
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   }
 //
 // TODO(cir): This is unreachable, but it really shouldn't be here. This is an

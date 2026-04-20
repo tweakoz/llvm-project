@@ -24,10 +24,8 @@ void test_cleanup_with_automatic_storage_duration() {
 // CIR:   cir.cleanup.scope {
 // CIR:     cir.store{{.*}} %[[REF_TMP]], %[[REF]]
 // CIR:     cir.call @_Z8mayThrowv()
-// CIR:     cir.yield
 // CIR:   } cleanup all {
 // CIR:     cir.call @_ZN5StrukD1Ev(%[[REF_TMP]]) nothrow
-// CIR:     cir.yield
 // CIR:   }
 // CIR:   cir.return
 

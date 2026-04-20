@@ -47,10 +47,8 @@ void init_vec_using_initalizer_list() {
 // CIR: %[[TMP_AGG:.*]] = cir.load {{.*}} %[[AGG_ADDR]] : !cir.ptr<!rec_std3A3Ainitializer_list3Cint3E>, !rec_std3A3Ainitializer_list3Cint3E
 // CIR: cir.call @_ZN6VectorC1ESt16initializer_listIiE(%[[VEC_ADDR]], %[[TMP_AGG]]) : (!cir.ptr<!rec_Vector> {llvm.align = 1 : i64, llvm.dereferenceable = 1 : i64, llvm.nonnull, llvm.noundef}, !rec_std3A3Ainitializer_list3Cint3E) -> ()
 // CIR: cir.cleanup.scope {
-// CIR:   cir.yield
 // CIR: } cleanup normal {
 // CIR:   cir.call @_ZN6VectorD1Ev(%[[VEC_ADDR]]) nothrow : (!cir.ptr<!rec_Vector> {llvm.align = 1 : i64, llvm.dereferenceable = 1 : i64, llvm.nonnull, llvm.noundef}) -> ()
-// CIR:   cir.yield
 // CIR: }
 
 // LLVM:   %[[VEC_ADDR:.*]] = alloca %struct.Vector, i64 1, align 1

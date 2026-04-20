@@ -73,14 +73,12 @@ void test_array_destructor() {
 // CIR:     %[[ONE:.*]] = cir.const #cir.int<1> : !s64i
 // CIR:     %[[ARR_NEXT:.*]] = cir.ptr_stride %[[ARR_CUR]], %[[ONE]] : (!cir.ptr<!rec_array_element>, !s64i)
 // CIR:     cir.store{{.*}} %[[ARR_NEXT]], %[[ARR_PTR]] : !cir.ptr<!rec_array_element>, !cir.ptr<!cir.ptr<!rec_array_element>>
-// CIR:     cir.yield
 // CIR:   } while {
 // CIR:     %[[ARR_CUR:.*]] = cir.load{{.*}} %[[ARR_PTR]]
 // CIR:     %[[CMP:.*]] = cir.cmp ne %[[ARR_CUR]], %[[ARR_END]]
 // CIR:     cir.condition(%[[CMP]])
 // CIR:   }
 // CIR:   cir.cleanup.scope {
-// CIR:      cir.yield
 // CIR:   } cleanup normal {
 // CIR:     %[[FIVE:.*]] = cir.const #cir.int<5> : !u64i
 // CIR:     %[[BEGIN:.*]] = cir.cast array_to_ptrdecay %[[ARR]] : !cir.ptr<!cir.array<!rec_array_element x 5>>
@@ -93,13 +91,11 @@ void test_array_destructor() {
 // CIR:       %[[ARR_PREV:.*]] = cir.ptr_stride %[[ARR_CUR]], %[[NEG_ONE]] : (!cir.ptr<!rec_array_element>, !s64i)
 // CIR:       cir.store %[[ARR_PREV]], %[[ARR_PTR]]
 // CIR:       cir.call @_ZN13array_elementD1Ev(%[[ARR_PREV]]) nothrow : (!cir.ptr<!rec_array_element> {{.*}}) -> ()
-// CIR:       cir.yield
 // CIR:     } while {
 // CIR:       %[[ARR_CUR:.*]] = cir.load{{.*}} %[[ARR_PTR]]
 // CIR:       %[[CMP:.*]] = cir.cmp ne %[[ARR_CUR]], %[[BEGIN]]
 // CIR:       cir.condition(%[[CMP]])
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   }
 
 

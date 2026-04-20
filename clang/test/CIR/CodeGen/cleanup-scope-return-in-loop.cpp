@@ -35,8 +35,6 @@ int test_cleanup_return_in_loop(int n) {
 // CIR:               cir.return
 // CIR:             } cleanup normal {
 // CIR:               cir.call @_ZN5StrukD1Ev
-// CIR:               cir.yield
-// CIR:         cir.yield
 // CIR:         } step {
 // CIR:       cir.return
 

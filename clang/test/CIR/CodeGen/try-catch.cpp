@@ -50,7 +50,6 @@ void try_catch_with_empty_catch_all() {
 // CIR:     %[[TMP_A:.*]] = cir.load{{.*}} %[[A_ADDR]] : !cir.ptr<!s32i>, !s32i
 // CIR:     %[[RESULT:.*]] = cir.inc nsw %[[TMP_A]] : !s32i
 // CIR:     cir.store{{.*}} %[[RESULT]], %[[A_ADDR]] : !s32i, !cir.ptr<!s32i>
-// CIR:     cir.yield
 // CIR:   }
 // CIR: }
 
@@ -136,7 +135,6 @@ void try_catch_with_alloca() {
 // CIR:     %[[TMP_B:.*]] = cir.load{{.*}} %[[B_ADDR]] : !cir.ptr<!s32i>, !s32i
 // CIR:     %[[RESULT:.*]] = cir.add nsw %[[TMP_A]], %[[TMP_B]] : !s32i
 // CIR:     cir.store{{.*}} %[[RESULT]], %[[C_ADDR]] : !s32i, !cir.ptr<!s32i>
-// CIR:     cir.yield
 // CIR:   }
 // CIR: }
 
@@ -177,7 +175,6 @@ void calling_noexcept_function_inside_try_block() {
 // CIR: cir.scope {
 // CIR:   cir.try {
 // CIR:     cir.call @_Z22function_with_noexceptv() nothrow : () -> ()
-// CIR:     cir.yield
 // CIR:   }
 // CIR: }
 
@@ -208,16 +205,12 @@ void call_function_inside_try_catch_all() {
 // CIR: cir.scope {
 // CIR:   cir.try {
 // CIR:       %[[CALL:.*]] = cir.call @_Z8divisionv()
-// CIR:       cir.yield
 // CIR:   } catch all (%[[EH_TOKEN:.*]]: !cir.eh_token{{.*}}) {
 // CIR:       %[[CATCH_TOKEN:.*]], %[[EXN_PTR:.*]] = cir.begin_catch %[[EH_TOKEN]] : !cir.eh_token -> (!cir.catch_token, !cir.ptr<!void>)
 // CIR:       cir.cleanup.scope {
-// CIR:         cir.yield
 // CIR:       } cleanup {{.*}} {
 // CIR:         cir.end_catch %[[CATCH_TOKEN]] : !cir.catch_token
-// CIR:         cir.yield
 // CIR:       }
-// CIR:       cir.yield
 // CIR:   }
 // CIR: }
 
@@ -294,18 +287,14 @@ void call_function_inside_try_catch_with_exception_type() {
 // CIR:   %[[EXCEPTION_ADDR:.*]] = cir.alloca !s32i, !cir.ptr<!s32i>, ["e"]
 // CIR:   cir.try {
 // CIR:     %[[CALL:.*]] = cir.call @_Z8divisionv()
-// CIR:     cir.yield
 // CIR:   } catch [type #cir.global_view<@_ZTIi> : !cir.ptr<!u8i>] (%[[EH_TOKEN:.*]]: !cir.eh_token{{.*}}) {
 // CIR:     %[[CATCH_TOKEN:.*]], %[[EXN_PTR:.*]] = cir.begin_catch %[[EH_TOKEN]] : !cir.eh_token -> (!cir.catch_token, !cir.ptr<!s32i>)
 // CIR:     cir.cleanup.scope {
 // CIR:       %[[TMP:.*]] = cir.load {{.*}} %[[EXN_PTR]] : !cir.ptr<!s32i>, !s32i
 // CIR:       cir.store {{.*}} %[[TMP]], %[[EXCEPTION_ADDR]] : !s32i, !cir.ptr<!s32i>
-// CIR:       cir.yield
 // CIR:     } cleanup {{.*}} {
 // CIR:       cir.end_catch %[[CATCH_TOKEN]] : !cir.catch_token
-// CIR:       cir.yield
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   } unwind (%{{.*}}: !cir.eh_token{{.*}}) {
 // CIR:     cir.resume %{{.*}} : !cir.eh_token
 // CIR:   }
@@ -412,17 +401,13 @@ void call_function_inside_try_catch_with_ref_exception_type() {
 // CIR:   %[[EXCEPTION_ADDR:.*]] = cir.alloca !cir.ptr<!s32i>, !cir.ptr<!cir.ptr<!s32i>>, ["ref", const]
 // CIR:   cir.try {
 // CIR:     %[[CALL:.*]] = cir.call @_Z8divisionv()
-// CIR:     cir.yield
 // CIR:   } catch [type #cir.global_view<@_ZTIi> : !cir.ptr<!u8i>] (%{{.*}}: !cir.eh_token {{.*}}) {
 // CIR:     %[[CATCH_TOKEN:.*]], %[[EXN_PTR:.*]] = cir.begin_catch %{{.*}} : !cir.eh_token -> (!cir.catch_token, !cir.ptr<!s32i>)
 // CIR:     cir.cleanup.scope {
 // CIR:       cir.store {{.*}} %[[EXN_PTR]], %[[EXCEPTION_ADDR]] : !cir.ptr<!s32i>, !cir.ptr<!cir.ptr<!s32i>>
-// CIR:       cir.yield
 // CIR:     } cleanup all {
 // CIR:       cir.end_catch %[[CATCH_TOKEN]] : !cir.catch_token
-// CIR:       cir.yield
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   } unwind (%{{.*}}: !cir.eh_token {{.*}}) {
 // CIR:     cir.resume %{{.*}} : !cir.eh_token
 // CIR:   }
@@ -527,18 +512,14 @@ void call_function_inside_try_catch_with_complex_exception_type() {
 // CIR:   %[[EXCEPTION_ADDR:.*]] = cir.alloca !cir.complex<!s32i>, !cir.ptr<!cir.complex<!s32i>>, ["e"]
 // CIR:   cir.try {
 // CIR:     %[[CALL:.*]] = cir.call @_Z8divisionv()
-// CIR:     cir.yield
 // CIR:   } catch [type #cir.global_view<@_ZTICi> : !cir.ptr<!u8i>] (%[[EH_TOKEN:.*]]: !cir.eh_token{{.*}}) {
 // CIR:     %[[CATCH_TOKEN:.*]], %[[EXN_PTR:.*]] = cir.begin_catch %[[EH_TOKEN]] : !cir.eh_token -> (!cir.catch_token, !cir.ptr<!cir.complex<!s32i>>)
 // CIR:     cir.cleanup.scope {
 // CIR:       %[[TMP:.*]] = cir.load {{.*}} %[[EXN_PTR]] : !cir.ptr<!cir.complex<!s32i>>, !cir.complex<!s32i>
 // CIR:       cir.store {{.*}} %[[TMP]], %[[EXCEPTION_ADDR]] : !cir.complex<!s32i>, !cir.ptr<!cir.complex<!s32i>>
-// CIR:       cir.yield
 // CIR:     } cleanup {{.*}} {
 // CIR:       cir.end_catch %[[CATCH_TOKEN]] : !cir.catch_token
-// CIR:       cir.yield
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   } unwind (%{{.*}}: !cir.eh_token{{.*}}) {
 // CIR:     cir.resume %{{.*}} : !cir.eh_token
 // CIR:   }
@@ -651,17 +632,13 @@ void call_function_inside_try_catch_with_array_exception_type() {
 // CIR:   %[[E_ADDR:.*]] = cir.alloca !cir.ptr<!s32i>, !cir.ptr<!cir.ptr<!s32i>>, ["e"]
 // CIR:   cir.try {
 // CIR:     %[[CALL:.*]] = cir.call @_Z8divisionv()
-// CIR:     cir.yield
 // CIR:   } catch [type #cir.global_view<@_ZTIPi> : !cir.ptr<!u8i>] (%[[EH_TOKEN:.*]]: !cir.eh_token{{.*}}) {
 // CIR:     %[[CATCH_TOKEN:.*]], %[[EXN_PTR:.*]] = cir.begin_catch %[[EH_TOKEN]] : !cir.eh_token -> (!cir.catch_token, !cir.ptr<!s32i>)
 // CIR:     cir.cleanup.scope {
 // CIR:       cir.store {{.*}} %[[EXN_PTR]], %[[E_ADDR]] : !cir.ptr<!s32i>, !cir.ptr<!cir.ptr<!s32i>>
-// CIR:       cir.yield
 // CIR:     } cleanup {{.*}} {
 // CIR:       cir.end_catch %[[CATCH_TOKEN]] : !cir.catch_token
-// CIR:       cir.yield
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   } unwind (%{{.*}}: !cir.eh_token{{.*}}) {
 // CIR:     cir.resume %{{.*}} : !cir.eh_token
 // CIR:   }
@@ -767,27 +744,20 @@ void call_function_inside_try_catch_with_exception_type_and_catch_all() {
 // CIR:   %[[EXCEPTION_ADDR:.*]] = cir.alloca !s32i, !cir.ptr<!s32i>, ["e"]
 // CIR:   cir.try {
 // CIR:     %[[CALL:.*]] = cir.call @_Z8divisionv()
-// CIR:     cir.yield
 // CIR:   } catch [type #cir.global_view<@_ZTIi> : !cir.ptr<!u8i>] (%[[EH_TOKEN:.*]]: !cir.eh_token{{.*}}) {
 // CIR:     %[[CATCH_TOKEN:.*]], %[[EXN_PTR:.*]] = cir.begin_catch %[[EH_TOKEN]] : !cir.eh_token -> (!cir.catch_token, !cir.ptr<!s32i>)
 // CIR:     cir.cleanup.scope {
 // CIR:       %[[TMP:.*]] = cir.load {{.*}} %[[EXN_PTR]] : !cir.ptr<!s32i>, !s32i
 // CIR:       cir.store {{.*}} %[[TMP]], %[[EXCEPTION_ADDR]] : !s32i, !cir.ptr<!s32i>
-// CIR:       cir.yield
 // CIR:     } cleanup {{.*}} {
 // CIR:       cir.end_catch %[[CATCH_TOKEN]] : !cir.catch_token
-// CIR:       cir.yield
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   } catch all (%[[EH_TOKEN2:.*]]: !cir.eh_token{{.*}}) {
 // CIR:     %[[CATCH_TOKEN2:.*]], %{{.*}} = cir.begin_catch %[[EH_TOKEN2]] : !cir.eh_token -> (!cir.catch_token, !cir.ptr<!void>)
 // CIR:     cir.cleanup.scope {
-// CIR:       cir.yield
 // CIR:     } cleanup {{.*}} {
 // CIR:       cir.end_catch %[[CATCH_TOKEN2]] : !cir.catch_token
-// CIR:       cir.yield
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   }
 // CIR: }
 
@@ -905,21 +875,15 @@ void cleanup_inside_try_body() {
 // CIR:   cir.try {
 // CIR:     cir.cleanup.scope {
 // CIR:       cir.call @_Z8divisionv()
-// CIR:       cir.yield
 // CIR:     } cleanup  all {
 // CIR:       cir.call @_ZN1SD1Ev(%[[S]])
-// CIR:       cir.yield
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   } catch all (%[[TOKEN:.*]]: !cir.eh_token {{.*}}) {
 // CIR:     %[[CATCH_TOKEN:.*]], %[[EXN_PTR:.*]] = cir.begin_catch %[[TOKEN]] : !cir.eh_token -> (!cir.catch_token, !cir.ptr<!void>)
 // CIR:     cir.cleanup.scope {
-// CIR:       cir.yield
 // CIR:     } cleanup  all {
 // CIR:       cir.end_catch %[[CATCH_TOKEN]] : !cir.catch_token
-// CIR:       cir.yield
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   }
 // CIR: }
 
@@ -1014,17 +978,13 @@ void call_function_inside_try_catch_with_aggregate_exception_type() {
 // CIR:   %[[E_ADDR:.*]] = cir.alloca !rec_CustomError, !cir.ptr<!rec_CustomError>, ["e"]
 // CIR:   cir.try {
 // CIR:     %[[CALL:.*]] = cir.call @_Z8divisionv() : () -> (!s32i {llvm.noundef})
-// CIR:     cir.yield
 // CIR:   } catch [type #cir.global_view<@_ZTI11CustomError> : !cir.ptr<!u8i>] (%{{.*}}: !cir.eh_token {{.*}}) {
 // CIR:     %[[CATCH_TOKEN:.*]], %[[EXN_PTR:.*]] = cir.begin_catch %{{.*}} : !cir.eh_token -> (!cir.catch_token, !cir.ptr<!rec_CustomError>)
 // CIR:     cir.cleanup.scope {
 // CIR:       cir.copy %[[EXN_PTR]] to %[[E_ADDR]] : !cir.ptr<!rec_CustomError>
-// CIR:       cir.yield
 // CIR:     } cleanup all {
 // CIR:       cir.end_catch %[[CATCH_TOKEN]] : !cir.catch_token
-// CIR:       cir.yield
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   } unwind (%{{.*}}: !cir.eh_token {{.*}}) {
 // CIR:     cir.resume %{{.*}} : !cir.eh_token
 // CIR:   }
@@ -1134,19 +1094,15 @@ void call_function_inside_try_catch_with_ref_ptr_of_record_exception_type() {
 // CIR:   %[[EXN_BYREF_TMP:.*]] = cir.alloca !cir.ptr<!rec_Record>, !cir.ptr<!cir.ptr<!rec_Record>>, ["exn.byref.tmp"]
 // CIR:   cir.try {
 // CIR:     %[[CALL:.*]] = cir.call @_Z8divisionv() : () -> (!s32i {llvm.noundef})
-// CIR:     cir.yield
 // CIR:   } catch [type #cir.global_view<@_ZTIP6Record> : !cir.ptr<!u8i>] (%[[EH_TOKEN:.*]]: !cir.eh_token {{.*}}) {
 // CIR:     %[[CATCH_TOKEN:.*]], %[[EXN_PTR:.*]] = cir.begin_catch %[[EH_TOKEN]] : !cir.eh_token -> (!cir.catch_token, !cir.ptr<!cir.ptr<!rec_Record>>)
 // CIR:     cir.cleanup.scope {
 // CIR:       %[[EXN_PTR_REC_PTR:.*]] = cir.cast bitcast %[[EXN_PTR]] : !cir.ptr<!cir.ptr<!rec_Record>> -> !cir.ptr<!rec_Record>
 // CIR:       cir.store {{.*}} %[[EXN_PTR_REC_PTR]], %[[EXN_BYREF_TMP]] : !cir.ptr<!rec_Record>, !cir.ptr<!cir.ptr<!rec_Record>>
 // CIR:       cir.store {{.*}} %[[EXN_BYREF_TMP]], %[[E_ADDR]] : !cir.ptr<!cir.ptr<!rec_Record>>, !cir.ptr<!cir.ptr<!cir.ptr<!rec_Record>>>
-// CIR:       cir.yield
 // CIR:     } cleanup all {
 // CIR:       cir.end_catch %[[CATCH_TOKEN]] : !cir.catch_token
-// CIR:       cir.yield
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   } unwind (%{{.*}}: !cir.eh_token {{.*}}) {
 // CIR:     cir.resume %{{.*}} : !cir.eh_token
 // CIR:   }
@@ -1256,18 +1212,14 @@ void call_function_inside_try_catch_with_exception_member_ptr_type() {
 // CIR:   %[[E_ADDR:.*]] = cir.alloca !s64i, !cir.ptr<!s64i>, ["memberPtr"]
 // CIR:   cir.try {
 // CIR:     %[[CALL:.*]] = cir.call @_Z8divisionv() : () -> (!s32i {llvm.noundef})
-// CIR:     cir.yield
 // CIR:   } catch [type #cir.global_view<@_ZTIM6Recordi> : !cir.ptr<!u8i>] (%{{.*}}: !cir.eh_token {{.*}} {
 // CIR:     %[[CATCH_TOKEN:.*]], %[[EXN_PTR:.*]] = cir.begin_catch %{{.*}} : !cir.eh_token -> (!cir.catch_token, !cir.ptr<!s64i>)
 // CIR:     cir.cleanup.scope {
 // CIR:       %[[TMP:.*]] = cir.load {{.*}} %[[EXN_PTR]] : !cir.ptr<!s64i>, !s64i
 // CIR:       cir.store {{.*}} %[[TMP]], %[[E_ADDR]] : !s64i, !cir.ptr<!s64i>
-// CIR:       cir.yield
 // CIR:     } cleanup all {
 // CIR:       cir.end_catch %[[CATCH_TOKEN]] : !cir.catch_token
-// CIR:       cir.yield
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   } unwind (%{{.*}}: !cir.eh_token {{.*}} {
 // CIR:     cir.resume %{{.*}} : !cir.eh_token
 // CIR:   }

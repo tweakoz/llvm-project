@@ -52,19 +52,15 @@ bool test_temp_or() { return make_temp(1) || make_temp(2); }
 // CIR:       cir.cleanup.scope {
 // CIR:         %[[MAKE_TEMP1:.*]] = cir.call @_Z9make_tempRK1B(%[[REF_TMP1]]) : (!cir.ptr<!rec_B>
 // CIR:         cir.store{{.*}} %[[MAKE_TEMP1]], %[[CLEANUP_TMP]]
-// CIR:         cir.yield
 // CIR:       } cleanup normal {
 // CIR:         cir.call @_ZN1BD2Ev(%[[REF_TMP1]])
-// CIR:         cir.yield
 // CIR:       }
 // CIR:       %[[TERNARY_TMP:.*]] = cir.load{{.*}} %[[CLEANUP_TMP]]
 // CIR:       cir.yield %[[TERNARY_TMP]] : !cir.bool
 // CIR:     })
 // CIR:     cir.store{{.*}} %[[TERNARY]], %[[RET_ADDR]]
-// CIR:     cir.yield
 // CIR:   } cleanup normal {
 // CIR:     cir.call @_ZN1BD2Ev(%[[REF_TMP0]])
-// CIR:     cir.yield
 // CIR:   }
 // CIR:   %[[RETVAL:.*]] = cir.load{{.*}} %[[RET_ADDR]]
 // CIR:   cir.return %[[RETVAL]]
@@ -151,10 +147,8 @@ bool test_temp_and() { return make_temp(1) && make_temp(2); }
 // CIR:       cir.cleanup.scope {
 // CIR:         %[[MAKE_TEMP1:.*]] = cir.call @_Z9make_tempRK1B(%[[REF_TMP1]]) : (!cir.ptr<!rec_B>
 // CIR:         cir.store{{.*}} %[[MAKE_TEMP1]], %[[CLEANUP_TMP]]
-// CIR:         cir.yield
 // CIR:       } cleanup normal {
 // CIR:         cir.call @_ZN1BD2Ev(%[[REF_TMP1]])
-// CIR:         cir.yield
 // CIR:       }
 // CIR:       %[[TERNARY_TMP:.*]] = cir.load{{.*}} %[[CLEANUP_TMP]]
 // CIR:       cir.yield %[[TERNARY_TMP]] : !cir.bool
@@ -163,10 +157,8 @@ bool test_temp_and() { return make_temp(1) && make_temp(2); }
 // CIR:       cir.yield %[[FALSE]] : !cir.bool
 // CIR:     })
 // CIR:     cir.store{{.*}} %[[TERNARY]], %[[RET_ADDR]]
-// CIR:     cir.yield
 // CIR:   } cleanup normal {
 // CIR:     cir.call @_ZN1BD2Ev(%[[REF_TMP0]])
-// CIR:     cir.yield
 // CIR:   }
 // CIR:   %[[RETVAL:.*]] = cir.load{{.*}} %[[RET_ADDR]]
 // CIR:   cir.return %[[RETVAL]]
@@ -350,15 +342,11 @@ int test_temp_in_condition(G &obj) {
 // CIR:       cir.cleanup.scope {
 // CIR:         %[[EQUAL:.*]] = cir.call @_ZNK1GeqERKS_(%[[REF_TMP0]], %[[REF_TMP1]]) : (!cir.ptr<!rec_G> {{.*}}, !cir.ptr<!rec_G> {{.*}}) -> (!cir.bool {{.*}})
 // CIR:         cir.store{{.*}} %[[EQUAL]], %[[CLEANUP_TMP]]
-// CIR:         cir.yield
 // CIR:       } cleanup normal {
 // CIR:         cir.call @_ZN1GD1Ev(%[[REF_TMP1]]) nothrow : (!cir.ptr<!rec_G> {{.*}}) -> ()
-// CIR:         cir.yield
 // CIR:       }
-// CIR:       cir.yield
 // CIR:     } cleanup normal {
 // CIR:       cir.call @_ZN1GD1Ev(%[[REF_TMP0]]) nothrow : (!cir.ptr<!rec_G> {{.*}}) -> ()
-// CIR:       cir.yield
 // CIR:     }
 // CIR:     %[[CONDITION:.*]] = cir.load{{.*}} %[[CLEANUP_TMP]] : !cir.ptr<!cir.bool>, !cir.bool
 // CIR:     cir.if %[[CONDITION]] {

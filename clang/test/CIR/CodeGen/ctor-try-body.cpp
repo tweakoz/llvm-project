@@ -49,10 +49,8 @@ struct HasThings : Base {
 // CIR-NEXT:      %[[CATCH_TOK:.*]], %[[EX_PTR:.*]] = cir.begin_catch %[[CATCH_ARG]] : !cir.eh_token -> (!cir.catch_token, !cir.ptr<!void>)
 // CIR-NEXT:      cir.cleanup.scope {
 // CIR-NEXT:        cir.call @_Z12side_effect2v() : () -> ()
-// CIR-NEXT:        cir.yield
 // CIR-NEXT:      } cleanup all {
 // CIR-NEXT:        cir.end_catch %[[CATCH_TOK]] : !cir.catch_token
-// CIR-NEXT:        cir.yield
 // CIR-NEXT:      }
 // CIR-NEXT:      cir.yield
 // CIR-NEXT:    }

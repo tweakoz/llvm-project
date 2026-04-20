@@ -22,10 +22,8 @@ void capture_one(S s) {
 // CIR:         %[[FIELD:.*]] = cir.get_member %[[LAM]][0] {name = "s"}
 // CIR:         cir.call @_ZN1SC1ERKS_(%[[FIELD]],
 // CIR:         cir.cleanup.scope {
-// CIR:           cir.yield
 // CIR:         } cleanup all {
 // CIR:           cir.call @_ZZ11capture_one1SEN3$_0D1Ev(%[[LAM]]){{.*}}
-// CIR:           cir.yield
 // CIR:         }
 
 // LLVM-LABEL: define internal void @"_ZZ11capture_one1SEN3$_0D2Ev"(
@@ -60,16 +58,12 @@ void capture_two(S a, S b) {
 // CIR:         cir.cleanup.scope {
 // CIR:           %[[FB:.*]] = cir.get_member %[[LAM2]][1] {name = "b"}
 // CIR:           cir.call @_ZN1SC1ERKS_(%[[FB]],
-// CIR:           cir.yield
 // CIR:         } cleanup eh {
 // CIR:           cir.call @_ZN1SD1Ev(%[[FA]]){{.*}}
-// CIR:           cir.yield
 // CIR:         }
 // CIR:         cir.cleanup.scope {
-// CIR:           cir.yield
 // CIR:         } cleanup all {
 // CIR:           cir.call @_ZZ11capture_two1SS_EN3$_0D1Ev(%[[LAM2]]){{.*}}
-// CIR:           cir.yield
 // CIR:         }
 
 // LLVM-LABEL: define internal void @"_ZZ11capture_two1SS_EN3$_0D2Ev"(
@@ -114,10 +108,8 @@ void capture_mixed(int n, S s) {
 // CIR:         %[[FS:.*]] = cir.get_member %[[LAM3]][1] {name = "s"}
 // CIR:         cir.call @_ZN1SC1ERKS_(%[[FS]],
 // CIR:         cir.cleanup.scope {
-// CIR:           cir.yield
 // CIR:         } cleanup all {
 // CIR:           cir.call @_ZZ13capture_mixedi1SEN3$_0D1Ev(%[[LAM3]]){{.*}}
-// CIR:           cir.yield
 // CIR:         }
 
 // LLVM-LABEL: define internal void @"_ZZ13capture_mixedi1SEN3$_0D2Ev"(
@@ -161,15 +153,11 @@ void capture_local() {
 // CIR:           %[[FL:.*]] = cir.get_member %[[LAM4]][0] {name = "s"}
 // CIR:           cir.call @_ZN1SC1ERKS_(%[[FL]],
 // CIR:           cir.cleanup.scope {
-// CIR:             cir.yield
 // CIR:           } cleanup all {
 // CIR:             cir.call @_ZZ13capture_localvEN3$_0D1Ev(%[[LAM4]]){{.*}}
-// CIR:             cir.yield
 // CIR:           }
-// CIR:           cir.yield
 // CIR:         } cleanup all {
 // CIR:           cir.call @_ZN1SD1Ev(%[[S4]]){{.*}}
-// CIR:           cir.yield
 // CIR:         }
 
 // LLVM-LABEL: define internal void @"_ZZ13capture_localvEN3$_0D2Ev"(
@@ -227,19 +215,15 @@ void stmt_expr_return(bool cond) {
 // CIR:           cir.call @_ZN1SC1Ei(%[[FB5]],
 // CIR:           %[[FALSE:.*]] = cir.const #false
 // CIR:           cir.store %[[FALSE]], %[[ACTIVE]]
-// CIR:           cir.yield
 // CIR:         } cleanup all {
 // CIR:           %[[FLAG:.*]] = cir.load{{.*}} %[[ACTIVE]]
 // CIR:           cir.if %[[FLAG]] {
 // CIR:             cir.call @_ZN1SD1Ev(%[[FA5]]){{.*}}
 // CIR:           }
-// CIR:           cir.yield
 // CIR:         }
 // CIR:         cir.cleanup.scope {
-// CIR:           cir.yield
 // CIR:         } cleanup all {
 // CIR:           cir.call @_ZZ16stmt_expr_returnbEN3$_0D1Ev(%[[LAM5]]){{.*}}
-// CIR:           cir.yield
 // CIR:         }
 
 // LLVM-LABEL: define internal void @"_ZZ16stmt_expr_returnbEN3$_0D2Ev"(

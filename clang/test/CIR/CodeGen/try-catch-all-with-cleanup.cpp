@@ -29,21 +29,15 @@ void test_catch_all_with_cleanup() {
 // CIR:       cir.call @_ZN1SC1Ev(%[[S]])
 // CIR:       cir.cleanup.scope {
 // CIR:         cir.call @_Z8mayThrowv()
-// CIR:         cir.yield
 // CIR:       } cleanup all {
 // CIR:         cir.call @_ZN1SD1Ev(%[[S]]) nothrow
-// CIR:         cir.yield
 // CIR:       }
-// CIR:       cir.yield
 // CIR:     } catch all (%{{.*}}: !cir.eh_token {{.*}}) {
 // CIR:       %{{.*}}, %{{.*}} = cir.begin_catch
 // CIR:       cir.cleanup.scope {
-// CIR:         cir.yield
 // CIR:       } cleanup all {
 // CIR:         cir.end_catch
-// CIR:         cir.yield
 // CIR:       }
-// CIR:       cir.yield
 // CIR:     }
 // CIR:   }
 
@@ -154,32 +148,23 @@ void test_catch_all_and_specific_with_cleanup() {
 // CIR:       cir.call @_ZN1SC1Ev(%[[S]])
 // CIR:       cir.cleanup.scope {
 // CIR:         cir.call @_Z8mayThrowv()
-// CIR:         cir.yield
 // CIR:       } cleanup all {
 // CIR:         cir.call @_ZN1SD1Ev(%[[S]]) nothrow
-// CIR:         cir.yield
 // CIR:       }
-// CIR:       cir.yield
 // CIR:     } catch [type #cir.global_view<@_ZTIi> : !cir.ptr<!u8i>] (%{{.*}}: !cir.eh_token {{.*}}) {
 // CIR:       %{{.*}}, %[[EXN:.*]] = cir.begin_catch %{{.*}} : !cir.eh_token -> (!cir.catch_token, !cir.ptr<!s32i>)
 // CIR:       cir.cleanup.scope {
 // CIR:         cir.load{{.*}} %[[EXN]] : !cir.ptr<!s32i>, !s32i
 // CIR:         cir.store{{.*}} %{{.*}}, %[[E]] : !s32i, !cir.ptr<!s32i>
-// CIR:         cir.yield
 // CIR:       } cleanup all {
 // CIR:         cir.end_catch %{{.*}} : !cir.catch_token
-// CIR:         cir.yield
 // CIR:       }
-// CIR:       cir.yield
 // CIR:     } catch all (%{{.*}}: !cir.eh_token {{.*}}) {
 // CIR:       %{{.*}}, %{{.*}} = cir.begin_catch %{{.*}} : !cir.eh_token -> (!cir.catch_token, !cir.ptr<!void>)
 // CIR:       cir.cleanup.scope {
-// CIR:         cir.yield
 // CIR:       } cleanup all {
 // CIR:         cir.end_catch %{{.*}} : !cir.catch_token
-// CIR:         cir.yield
 // CIR:       }
-// CIR:       cir.yield
 // CIR:     }
 // CIR:   }
 

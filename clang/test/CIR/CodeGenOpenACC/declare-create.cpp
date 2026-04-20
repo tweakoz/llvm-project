@@ -303,7 +303,6 @@ struct Struct {
     // CHECK-NEXT: %[[ENTER:.*]] = acc.declare_enter dataOperands(%[[ARG_HSE_CREATE]], %[[ARG_INT_CREATE]], %[[LOC_HSE_CREATE]], %[[LOC_INT_CREATE]], %[[ARG_HSE_PTR_CREATE]], %[[LOC_HSE_ARR_CREATE]] : !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!cir.ptr<!rec_HasSideEffects>>, !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>)
 
     // CHECK-NEXT: cir.cleanup.scope {
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: } cleanup normal {
     // CHECK-NEXT:   acc.declare_exit token(%[[ENTER]]) dataOperands(%[[ARG_HSE_CREATE]], %[[ARG_INT_CREATE]], %[[LOC_HSE_CREATE]], %[[LOC_INT_CREATE]], %[[ARG_HSE_PTR_CREATE]], %[[LOC_HSE_ARR_CREATE]] : !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!cir.ptr<!rec_HasSideEffects>>, !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>)
     // CHECK-NEXT:   acc.delete accPtr(%[[ARG_HSE_CREATE]] : !cir.ptr<!rec_HasSideEffects>) {dataClause = #acc<data_clause acc_create>, modifiers = #acc<data_clause_modifier zero>, name = "ArgHSE"}
@@ -312,7 +311,6 @@ struct Struct {
     // CHECK-NEXT:   acc.delete accPtr(%[[LOC_INT_CREATE]] : !cir.ptr<!s32i>) {dataClause = #acc<data_clause acc_create>, modifiers = #acc<data_clause_modifier zero>, name = "LocalInt"}
     // CHECK-NEXT:   acc.delete accPtr(%[[ARG_HSE_PTR_CREATE]] : !cir.ptr<!cir.ptr<!rec_HasSideEffects>>) bounds(%[[BOUND1]]) {dataClause = #acc<data_clause acc_create>, modifiers = #acc<data_clause_modifier zero>, name = "ArgHSEPtr[1:1]"}
     // CHECK-NEXT:   acc.delete accPtr(%[[LOC_HSE_ARR_CREATE]] : !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>) bounds(%[[BOUND2]]) {dataClause = #acc<data_clause acc_create>, modifiers = #acc<data_clause_modifier zero>, name = "LocalHSEArr[1:1]"}
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: }
   }
   void MemFunc2(HasSideEffects ArgHSE, int ArgInt, HasSideEffects *ArgHSEPtr);
@@ -372,23 +370,19 @@ void Struct::MemFunc2(HasSideEffects ArgHSE, int ArgInt, HasSideEffects *ArgHSEP
     // CHECK-NEXT:   %[[ENTER2:.*]] = acc.declare_enter dataOperands(%[[LOC_HSE_CREATE]], %[[LOC_INT_CREATE]], %[[LOC_HSE_ARR_CREATE]] : !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>)
 
     // CHECK-NEXT: cir.cleanup.scope {
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: cleanup normal {
     // CHECK-NEXT:   acc.declare_exit token(%[[ENTER2]]) dataOperands(%[[LOC_HSE_CREATE]], %[[LOC_INT_CREATE]], %[[LOC_HSE_ARR_CREATE]] : !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>)
     // CHECK-NEXT:   acc.delete accPtr(%[[LOC_HSE_CREATE]] : !cir.ptr<!rec_HasSideEffects>) {dataClause = #acc<data_clause acc_create>, modifiers = #acc<data_clause_modifier zero>, name = "LocalHSE"}
     // CHECK-NEXT:   acc.delete accPtr(%[[LOC_INT_CREATE]] : !cir.ptr<!s32i>) {dataClause = #acc<data_clause acc_create>, modifiers = #acc<data_clause_modifier zero>, name = "LocalInt"}
     // CHECK-NEXT:   acc.delete accPtr(%[[LOC_HSE_ARR_CREATE]] : !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>) bounds(%[[BOUND2]]) {dataClause = #acc<data_clause acc_create>, modifiers = #acc<data_clause_modifier zero>, name = "LocalHSEArr[1:1]"}
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: }
 
-    // CHECK-NEXT: cir.yield
 
     // CHECK-NEXT: cleanup normal {
     // CHECK-NEXT:   acc.declare_exit token(%[[ENTER1]]) dataOperands(%[[ARG_HSE_CREATE]], %[[ARG_INT_CREATE]], %[[ARG_HSE_PTR_CREATE]] : !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!cir.ptr<!rec_HasSideEffects>>)
     // CHECK-NEXT:   acc.delete accPtr(%[[ARG_HSE_CREATE]] : !cir.ptr<!rec_HasSideEffects>) {dataClause = #acc<data_clause acc_create>, modifiers = #acc<data_clause_modifier zero>, name = "ArgHSE"}
     // CHECK-NEXT:   acc.delete accPtr(%[[ARG_INT_CREATE]] : !cir.ptr<!s32i>) {dataClause = #acc<data_clause acc_create>, modifiers = #acc<data_clause_modifier zero>, name = "ArgInt"}
     // CHECK-NEXT:   acc.delete accPtr(%[[ARG_HSE_PTR_CREATE]] : !cir.ptr<!cir.ptr<!rec_HasSideEffects>>) bounds(%[[BOUND1]]) {dataClause = #acc<data_clause acc_create>, modifiers = #acc<data_clause_modifier zero>, name = "ArgHSEPtr[1:1]"}
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: }
 }
 
@@ -443,13 +437,11 @@ extern "C" void NormalFunc(HasSideEffects ArgHSE, int ArgInt, HasSideEffects *Ar
     do_thing();
     // CHECK-NEXT: cir.cleanup.scope {
     // CHECK-NEXT:   cir.call @do_thing
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: } cleanup normal {
     // CHECK-NEXT:   acc.declare_exit token(%[[ENTER2]]) dataOperands(%[[LOC_HSE_CREATE]], %[[LOC_INT_CREATE]], %[[LOC_HSE_ARR_CREATE]] : !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>)
     // CHECK-NEXT:   acc.delete accPtr(%[[LOC_HSE_CREATE]] : !cir.ptr<!rec_HasSideEffects>) {dataClause = #acc<data_clause acc_create>, name = "LocalHSE"}
     // CHECK-NEXT:   acc.delete accPtr(%[[LOC_INT_CREATE]] : !cir.ptr<!s32i>) {dataClause = #acc<data_clause acc_create>, name = "LocalInt"}
     // CHECK-NEXT:   acc.delete accPtr(%[[LOC_HSE_ARR_CREATE]] : !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>) bounds(%[[BOUND2]]) {dataClause = #acc<data_clause acc_create>, name = "LocalHSEArr[1:1]"}
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: }
   }
     // CHECK-NEXT: }
@@ -457,14 +449,12 @@ extern "C" void NormalFunc(HasSideEffects ArgHSE, int ArgInt, HasSideEffects *Ar
     // Make sure that cleanup gets put in the right scope.
     do_thing();
     // CHECK-NEXT: cir.call @do_thing
-    // CHECK-NEXT: cir.yield
     // CHECK-NEXT: cleanup normal {
     // CHECK-NEXT:   acc.declare_exit token(%[[ENTER1]]) dataOperands(%[[ARG_HSE_CREATE]], %[[ARG_INT_CREATE]], %[[ARG_HSE_PTR_CREATE]] : !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!cir.ptr<!rec_HasSideEffects>>)
  
     // CHECK-NEXT:   acc.delete accPtr(%[[ARG_HSE_CREATE]] : !cir.ptr<!rec_HasSideEffects>) {dataClause = #acc<data_clause acc_create>, modifiers = #acc<data_clause_modifier zero>, name = "ArgHSE"}
     // CHECK-NEXT:   acc.delete accPtr(%[[ARG_INT_CREATE]] : !cir.ptr<!s32i>) {dataClause = #acc<data_clause acc_create>, modifiers = #acc<data_clause_modifier zero>, name = "ArgInt"}
     // CHECK-NEXT:   acc.delete accPtr(%[[ARG_HSE_PTR_CREATE]] : !cir.ptr<!cir.ptr<!rec_HasSideEffects>>) bounds(%[[BOUND1]]) {dataClause = #acc<data_clause acc_create>, modifiers = #acc<data_clause_modifier zero>, name = "ArgHSEPtr[1:1]"}
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: }
 }
 

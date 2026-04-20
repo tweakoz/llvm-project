@@ -38,10 +38,8 @@ void test_field_initializer() {
 // CIR:   cir.call @_ZN9ContainedC1Ei(%[[CONTAINED_ADDR]], %[[ONE]])
 // CIR:   cir.cleanup.scope {
 // CIR:     cir.call @_Z8mayThrowv() : () -> ()
-// CIR:     cir.yield
 // CIR:   } cleanup eh {
 // CIR:     cir.call @_ZN9ContainedD1Ev(%[[CONTAINED_ADDR]])
-// CIR:     cir.yield
 // CIR:   }
 
 // LLVM: define {{.*}} void @_ZN9ContainerC2Ev

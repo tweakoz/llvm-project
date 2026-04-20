@@ -22,10 +22,8 @@ A *a() {
 // CIR:     cir.store{{.*}} %[[PTR_A]], %[[NEW_RESULT]] : !cir.ptr<!rec_A>, !cir.ptr<!cir.ptr<!rec_A>>
 // CIR:     %[[FIVE:.*]] = cir.const #cir.int<5> : !s32i
 // CIR:     cir.call @_ZN1AC1Ei(%[[PTR_A]], %[[FIVE]])
-// CIR:     cir.yield
 // CIR:   } cleanup  eh {
 // CIR:     cir.call @_ZdlPv(%[[PTR]]) nothrow {builtin} : (!cir.ptr<!void>) -> ()
-// CIR:     cir.yield
 // CIR:   }
 
 // LLVM: define {{.*}} ptr @_Z1av() {{.*}} personality ptr @__gxx_personality_v0 {
@@ -97,10 +95,8 @@ A *b() {
 // CIR:     cir.store{{.*}} %[[PTR_A]], %[[NEW_RESULT]] : !cir.ptr<!rec_A>, !cir.ptr<!cir.ptr<!rec_A>>
 // CIR:     %[[FOO:.*]] = cir.call @_Z3foov() : () -> !s32i
 // CIR:     cir.call @_ZN1AC1Ei(%[[PTR_A]], %[[FOO]])
-// CIR:     cir.yield
 // CIR:   } cleanup  eh {
 // CIR:     cir.call @_ZdlPv(%[[PTR]]) nothrow {builtin} : (!cir.ptr<!void>) -> ()
-// CIR:     cir.yield
 // CIR:   }
 
 // LLVM: define {{.*}} ptr @_Z1bv() {{.*}} personality ptr @__gxx_personality_v0 {
@@ -187,10 +183,8 @@ B *c() {
 // CIR:     cir.store{{.*}} %[[PTR_B]], %[[NEW_RESULT]] : !cir.ptr<!rec_B>, !cir.ptr<!cir.ptr<!rec_B>>
 // CIR:     %[[FIVE:.*]] = cir.const #cir.int<5> : !s32i
 // CIR:     cir.call @_ZN1BC1Ei(%[[PTR_B]], %[[FIVE]])
-// CIR:     cir.yield
 // CIR:   } cleanup  eh {
 // CIR:     cir.call @_ZN1BdlEPv(%[[PTR]]) nothrow : (!cir.ptr<!void>) -> ()
-// CIR:     cir.yield
 // CIR:   }
 
 // LLVM: define {{.*}} ptr @_Z1cv() {{.*}} personality ptr @__gxx_personality_v0 {

@@ -33,10 +33,8 @@ void force_default_ctor() { HasDtor x; }
 // CIR:   cir.call @_ZN7HasDtorC1Ei(%[[THIS]], %[[ZERO]]) : (!cir.ptr<!rec_HasDtor> {{.*}}, !s32i {{.*}}) -> ()
 // CIR:   cir.cleanup.scope {
 // CIR:     cir.call @_Z8mayThrowv() : () -> ()
-// CIR:     cir.yield
 // CIR:   } cleanup eh {
 // CIR:     cir.call @_ZN7HasDtorD1Ev(%[[THIS]]) nothrow : (!cir.ptr<!rec_HasDtor> {{.*}}) -> ()
-// CIR:     cir.yield
 // CIR:   }
 // CIR:   cir.return
 // CIR: }

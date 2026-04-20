@@ -16,9 +16,7 @@ cir.func @cleanup_scope_all() {
 
 // CHECK: cir.func @cleanup_scope_all() {
 // CHECK:   cir.cleanup.scope {
-// CHECK:     cir.yield
 // CHECK:   } cleanup all {
-// CHECK:     cir.yield
 // CHECK:   }
 // CHECK:   cir.return
 // CHECK: }
@@ -35,9 +33,7 @@ cir.func @cleanup_scope_normal() {
 
 // CHECK: cir.func @cleanup_scope_normal() {
 // CHECK:   cir.cleanup.scope {
-// CHECK:     cir.yield
 // CHECK:   } cleanup normal {
-// CHECK:     cir.yield
 // CHECK:   }
 // CHECK:   cir.return
 // CHECK: }
@@ -54,9 +50,7 @@ cir.func @cleanup_scope_eh() {
 
 // CHECK: cir.func @cleanup_scope_eh() {
 // CHECK:   cir.cleanup.scope {
-// CHECK:     cir.yield
 // CHECK:   } cleanup eh {
-// CHECK:     cir.yield
 // CHECK:   }
 // CHECK:   cir.return
 // CHECK: }
@@ -79,13 +73,9 @@ cir.func @nested_cleanup_scopes() {
 // CHECK: cir.func @nested_cleanup_scopes() {
 // CHECK:   cir.cleanup.scope {
 // CHECK:     cir.cleanup.scope {
-// CHECK:       cir.yield
 // CHECK:     } cleanup all {
-// CHECK:       cir.yield
 // CHECK:     }
-// CHECK:     cir.yield
 // CHECK:   } cleanup all {
-// CHECK:     cir.yield
 // CHECK:   }
 // CHECK:   cir.return
 // CHECK: }
@@ -105,9 +95,7 @@ cir.func @cleanup_in_scope() {
 // CHECK: cir.func @cleanup_in_scope() {
 // CHECK:   cir.scope {
 // CHECK:     cir.cleanup.scope {
-// CHECK:       cir.yield
 // CHECK:     } cleanup all {
-// CHECK:       cir.yield
 // CHECK:     }
 // CHECK:   }
 // CHECK:   cir.return
@@ -128,7 +116,6 @@ cir.func @return_within_cleanup() {
 // CHECK:   cir.cleanup.scope {
 // CHECK:     cir.return
 // CHECK:   } cleanup all {
-// CHECK:     cir.yield
 // CHECK:   }
 // CHECK:   cir.return
 // CHECK: }

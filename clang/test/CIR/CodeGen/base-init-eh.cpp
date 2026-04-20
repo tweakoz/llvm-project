@@ -29,10 +29,8 @@ void test_base_initializer() {
 // CIR:   cir.call @_ZN4BaseC2Ei(%[[BASE_ADDR]], %[[ZERO]])
 // CIR:   cir.cleanup.scope {
 // CIR:     cir.call @_Z8mayThrowv() : () -> ()
-// CIR:     cir.yield
 // CIR:   } cleanup eh {
 // CIR:     cir.call @_ZN4BaseD2Ev(%[[BASE_ADDR]])
-// CIR:     cir.yield
 // CIR:   }
 
 // LLVM: define {{.*}} void @_ZN7DerivedC2Ev
@@ -73,10 +71,8 @@ void test_virt_base_initializer() {
 // CIR:     %[[VTABLE_PTR:.*]] = cir.vtable.get_vptr %[[THIS]] : !cir.ptr<!rec_VirtDerived> -> !cir.ptr<!cir.vptr>
 // CIR:     cir.store{{.*}} %[[VTABLE_ADDR]], %[[VTABLE_PTR]] : !cir.vptr, !cir.ptr<!cir.vptr>
 // CIR:     cir.call @_Z8mayThrowv() : () -> ()
-// CIR:     cir.yield
 // CIR:   } cleanup eh {
 // CIR:     cir.call @_ZN4BaseD2Ev(%[[BASE_ADDR]])
-// CIR:     cir.yield
 // CIR:   }
 
 // LLVM: define {{.*}} void @_ZN11VirtDerivedC1Ev

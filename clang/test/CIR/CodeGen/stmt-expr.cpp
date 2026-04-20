@@ -65,10 +65,8 @@ void cleanup() {
 // CIR:   cir.scope {
 // CIR:     %[[WD:.+]] = cir.alloca !rec_with_dtor, !cir.ptr<!rec_with_dtor>, ["wd"]
 // CIR:     cir.cleanup.scope {
-// CIR:       cir.yield
 // CIR:     } cleanup normal {
 // CIR:       cir.call @_ZN9with_dtorD1Ev(%[[WD]]) nothrow : (!cir.ptr<!rec_with_dtor> {{.*}}) -> ()
-// CIR:       cir.yield
 // CIR:     }
 // CIR:   }
 // CIR:   cir.return

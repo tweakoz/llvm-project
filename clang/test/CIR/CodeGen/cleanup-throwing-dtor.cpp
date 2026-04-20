@@ -28,10 +28,8 @@ void test_throwing_dtor_cleanup() {
 // CIR:   %[[C:.*]] = cir.alloca !rec_ThrowingDtor, !cir.ptr<!rec_ThrowingDtor>, ["c"]
 // CIR:   cir.cleanup.scope {
 // CIR:     cir.call @_ZN12ThrowingDtor11doSomethingEv(%[[C]])
-// CIR:     cir.yield
 // CIR:   } cleanup all {
 // CIR:     cir.call @_ZN12ThrowingDtorD1Ev(%[[C]])
-// CIR:     cir.yield
 // CIR:   }
 
 // Flattened: body call becomes try_call. In the EH cleanup path, the dtor

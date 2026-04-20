@@ -34,21 +34,15 @@ void test_init_list_with_dtor() {
 // CIR:       %[[X:.*]] = cir.get_member %[[O]][2] {name = "x"}
 // CIR:       %[[THREE:.*]] = cir.const #cir.int<3> : !s32i
 // CIR:       cir.store align(4) %[[THREE]], %[[X]]
-// CIR:       cir.yield
 // CIR:     } cleanup eh {
 // CIR:       cir.call @_ZN5StrukD1Ev(%[[S2]])
-// CIR:       cir.yield
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   } cleanup eh {
 // CIR:     cir.call @_ZN5StrukD1Ev(%[[S1]])
-// CIR:     cir.yield
 // CIR:   }
 // CIR:   cir.cleanup.scope {
-// CIR:     cir.yield
 // CIR:   } cleanup all {
 // CIR:     cir.call @_ZN5OuterD1Ev(%[[O]])
-// CIR:     cir.yield
 // CIR:   }
 // CIR:   cir.return
 // CIR: }

@@ -53,7 +53,6 @@ void test_cleanup_for() {
 // CHECK:         %[[S:.*]] = cir.alloca !rec_Struk, !cir.ptr<!rec_Struk>, ["s"]
 // CHECK:         cir.call @_ZN5StrukD1Ev(%[[S]]) nothrow : (!cir.ptr<!rec_Struk> {{.*}}) -> ()
 // CHECK:       }
-// CHECK:       cir.yield
 // CHECK:     } step {
 // CHECK:     }
 // CHECK:   }
@@ -142,10 +141,8 @@ void complex_expr_with_cleanup_inside_cleanupscope() {
 // CHECK:     %[[ELEM_0:.*]] = cir.get_member %[[CONTAINER_ADDR]][0] {name = "value"} : !cir.ptr<!rec_ComplexContainerWithDtor> -> !cir.ptr<!cir.complex<!s32i>>
 // CHECK:     %[[TMP_ELEM_0:.*]] = cir.load {{.*}} %[[ELEM_0]] : !cir.ptr<!cir.complex<!s32i>>, !cir.complex<!s32i>
 // CHECK:     cir.store{{.*}} %[[TMP_ELEM_0]], %[[TEMP_ADDR]] : !cir.complex<!s32i>, !cir.ptr<!cir.complex<!s32i>>
-// CHECK:     cir.yield
 // CHECK:   } cleanup  normal {
 // CHECK:     cir.call @_ZN24ComplexContainerWithDtorD1Ev(%[[CONTAINER_ADDR]]) nothrow : (!cir.ptr<!rec_ComplexContainerWithDtor> {{.*}}) -> ()
-// CHECK:     cir.yield
 // CHECK:   }
 // CHECK:   %[[RELOAD:.*]] = cir.load {{.*}} %[[TEMP_ADDR]] : !cir.ptr<!cir.complex<!s32i>>, !cir.complex<!s32i>
 // CHECK:   cir.store {{.*}} %[[RELOAD]], %[[RESULT]] : !cir.complex<!s32i>, !cir.ptr<!cir.complex<!s32i>>
@@ -159,8 +156,6 @@ void test_cleanup_with_automatic_storage_duration() {
 // CHECK:   %[[REF:.*]] = cir.alloca !cir.ptr<!rec_Struk>, !cir.ptr<!cir.ptr<!rec_Struk>>, ["ref", init, const]
 // CHECK:   cir.cleanup.scope {
 // CHECK:     cir.store{{.*}} %[[REF_TMP]], %[[REF]]
-// CHECK:     cir.yield
 // CHECK:   } cleanup normal {
 // CHECK:     cir.call @_ZN5StrukD1Ev(%[[REF_TMP]]) nothrow
-// CHECK:     cir.yield
 // CHECK:   }

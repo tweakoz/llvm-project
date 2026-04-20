@@ -31,10 +31,8 @@ struct Struct {
     // CHECK-NEXT: %[[ENTER:.*]] = acc.declare_enter dataOperands(%[[DEV_PTR_ARG_HSE]], %[[DEV_PTR_ARG_INT]], %[[DEV_PTR_LOC_HSE]], %[[DEV_PTR_LOC_INT]] : !cir.ptr<!cir.ptr<!rec_HasSideEffects>>, !cir.ptr<!cir.ptr<!s32i>>, !cir.ptr<!cir.ptr<!rec_HasSideEffects>>, !cir.ptr<!cir.ptr<!s32i>>)
 
     // CHECK-NEXT: cir.cleanup.scope {
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: cleanup normal {
     // CHECK-NEXT:   acc.declare_exit token(%[[ENTER]])
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: }
   }
   void MemFunc2(HasSideEffects *ArgHSE, int *ArgInt);
@@ -70,17 +68,13 @@ void Struct::MemFunc2(HasSideEffects *ArgHSE, int *ArgInt) {
     // CHECK-NEXT:   %[[ENTER2:.*]] = acc.declare_enter dataOperands(%[[DEV_PTR_LOC_HSE]], %[[DEV_PTR_LOC_INT]] : !cir.ptr<!cir.ptr<!rec_HasSideEffects>>, !cir.ptr<!cir.ptr<!s32i>>)
     //
     // CHECK-NEXT:   cir.cleanup.scope {
-    // CHECK-NEXT:     cir.yield
     // CHECK-NEXT:   cleanup normal {
     // CHECK-NEXT:     acc.declare_exit token(%[[ENTER2]])
-    // CHECK-NEXT:     cir.yield
     // CHECK-NEXT:   }
 
-    // CHECK-NEXT:   cir.yield
 
     // CHECK-NEXT: cleanup normal {
     // CHECK-NEXT:   acc.declare_exit token(%[[ENTER1]])
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: }
 }
 
@@ -112,10 +106,8 @@ void NormalFunc(HasSideEffects *ArgHSE, int *ArgInt) {
     do_thing();
     // CHECK-NEXT: cir.cleanup.scope {
     // CHECK-NEXT:   cir.call @do_thing
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: } cleanup normal {
     // CHECK-NEXT:   acc.declare_exit token(%[[ENTER2]])
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: }
 
     }
@@ -124,9 +116,7 @@ void NormalFunc(HasSideEffects *ArgHSE, int *ArgInt) {
     // Make sure that cleanup gets put in the right scope.
     do_thing();
     // CHECK-NEXT: cir.call @do_thing
-    // CHECK-NEXT: cir.yield
     // CHECK-NEXT: cleanup normal {
     // CHECK-NEXT:   acc.declare_exit token(%[[ENTER1]])
-    // CHECK-NEXT:   cir.yield
 }
 

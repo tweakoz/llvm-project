@@ -27,10 +27,8 @@ void call_virtual_fn_in_cleanup_scope() {
 // CIR:     %[[FN_PTR_ADDR:.*]] = cir.vtable.get_virtual_fn_addr %[[VPTR]][0] : !cir.vptr -> !cir.ptr<!cir.ptr<!cir.func<(!cir.ptr<!rec_B>, !s8i)>>>
 // CIR:     %[[FN_PTR:.*]] = cir.load{{.*}} %[[FN_PTR_ADDR:.*]] : !cir.ptr<!cir.ptr<!cir.func<(!cir.ptr<!rec_B>, !s8i)>>>, !cir.ptr<!cir.func<(!cir.ptr<!rec_B>, !s8i)>>
 // CIR:     cir.call %[[FN_PTR]](%[[B]], %[[C_LITERAL]]) : (!cir.ptr<!cir.func<(!cir.ptr<!rec_B>, !s8i)>>, !cir.ptr<!rec_B> {{.*}}, !s8i {{.*}}) -> ()
-// CIR:     cir.yield
 // CIR:   } cleanup  all {
 // CIR:     cir.call @_ZN1BD1Ev(%[[B]]) nothrow : (!cir.ptr<!rec_B> {{.*}}) -> ()
-// CIR:     cir.yield
 // CIR:   }
 
 // CIR-FLAT: cir.func {{.*}} @_Z32call_virtual_fn_in_cleanup_scopev()

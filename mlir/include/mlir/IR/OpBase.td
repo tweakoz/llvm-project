@@ -122,9 +122,38 @@ def ElementwiseMappable : TraitList<[
 // Op's regions have a single block.
 def SingleBlock : NativeOpTrait<"SingleBlock">, StructuralOpTrait;
 
+/// Base class for ODS implicit-terminator printer/parser detection.
+/// Maps to C++ ImplicitDefaultTerminator<op>::Impl.
+class ImplicitDefaultTerminatorImpl<string op>
+    : ParamNativeOpTrait<"ImplicitDefaultTerminator", op>, StructuralOpTrait;
+
+// Any terminator accepted; T auto-inserted if absent. No SingleBlock.
+class ImplicitDefaultTerminator<string op>
+    : TraitList<[ImplicitDefaultTerminatorImpl<op>]>;
+
+/// Overrides C++ trait to ImplicitTerminator<op>::Impl.
+class ImplicitTerminatorImpl<string op> : ImplicitDefaultTerminatorImpl<op> {
+  let trait = "ImplicitTerminator<"#op#">::Impl";
+}
+
+// Only T accepted as terminator; T auto-inserted if absent. No SingleBlock.
+class ImplicitTerminator<string op> : TraitList<[ImplicitTerminatorImpl<op>]>;
+
+/// Overrides C++ trait to SingleBlockImplicitDefaultTerminator<op>::Impl.
+class SingleBlockImplicitDefaultTerminatorImpl<string op>
+    : ImplicitDefaultTerminatorImpl<op> {
+  let trait = "SingleBlockImplicitDefaultTerminator<"#op#">::Impl";
+}
+
+// Single block; any terminator accepted, T is the default.
+class SingleBlockImplicitDefaultTerminator<string op>
+    : TraitList<[SingleBlock, SingleBlockImplicitDefaultTerminatorImpl<op>]>;
+
+/// Overrides C++ trait to SingleBlockImplicitTerminator<op>::Impl.
 class SingleBlockImplicitTerminatorImpl<string op>
-    : ParamNativeOpTrait<"SingleBlockImplicitTerminator", op, [SingleBlock]>,
-      StructuralOpTrait;
+    : ImplicitDefaultTerminatorImpl<op> {
+  let trait = "SingleBlockImplicitTerminator<"#op#">::Impl";
+}
 
 // Op's regions have a single block with the specified terminator.
 class SingleBlockImplicitTerminator<string op>

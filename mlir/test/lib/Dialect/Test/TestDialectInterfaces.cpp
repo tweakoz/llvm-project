@@ -31,6 +31,22 @@ static_assert(OpTrait::hasSingleBlockImplicitTerminator<
                   SingleBlockImplicitTerminatorOp>::value,
               "hasSingleBlockImplicitTerminator does not match "
               "SingleBlockImplicitTerminatorOp");
+static_assert(
+    OpTrait::hasImplicitTerminator<SingleBlockImplicitTerminatorOp>::value,
+    "hasImplicitTerminator does not match "
+    "SingleBlockImplicitTerminatorOp");
+static_assert(llvm::is_detected<OpTrait::has_implicit_terminator_t,
+                                SingleBlockImplicitDefaultTerminatorOp>::value,
+              "has_implicit_terminator_t does not match "
+              "SingleBlockImplicitDefaultTerminatorOp");
+static_assert(OpTrait::hasImplicitTerminator<
+                  SingleBlockImplicitDefaultTerminatorOp>::value,
+              "hasImplicitTerminator does not match "
+              "SingleBlockImplicitDefaultTerminatorOp");
+static_assert(!OpTrait::hasSingleBlockImplicitTerminator<
+                  SingleBlockImplicitDefaultTerminatorOp>::value,
+              "hasSingleBlockImplicitTerminator should not match "
+              "SingleBlockImplicitDefaultTerminatorOp");
 
 struct TestResourceBlobManagerInterface
     : public ResourceBlobManagerDialectInterfaceBase<

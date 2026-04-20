@@ -45,15 +45,12 @@ void test_ternary_temporary(bool c, int x) {
 // CIR:       %[[GET_RESULT:.*]] = cir.call @_ZN1S3getEv(%[[TMP]])
 // CIR:       cir.yield %[[GET_RESULT]] : !s32i
 // CIR:     }, false {
-// CIR:       cir.yield
-// CIR:     cir.yield
 // With exceptions, the cleanup runs on both normal and EH paths.
 // CIR:   } cleanup all {
 // CIR:     %[[IS_ACTIVE:.*]] = cir.load {{.*}} %[[ACTIVE]]
 // CIR:     cir.if %[[IS_ACTIVE]] {
 // CIR:       cir.call @_ZN1SD1Ev(%[[TMP]])
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   }
 
 // LLVM-LABEL: define dso_local void @_Z22test_ternary_temporarybi(
@@ -157,7 +154,6 @@ void test_ternary_both_branches(bool c) {
 // CIR:       cir.store %[[TRUE_B]], %[[ACTB]] : !cir.bool, !cir.ptr<!cir.bool>
 // CIR:       %[[GET_B:.*]] = cir.call @_ZN1B3getEv(%[[TMPB]])
 // CIR:       cir.yield %[[GET_B]] : !s32i
-// CIR:     cir.yield
 // CIR:   } cleanup all {
 // CIR:     %[[FLAG_B:.*]] = cir.load {{.*}} %[[ACTB]]
 // CIR:     cir.if %[[FLAG_B]] {
@@ -167,7 +163,6 @@ void test_ternary_both_branches(bool c) {
 // CIR:     cir.if %[[FLAG_A]] {
 // CIR:       cir.call @_ZN1AD1Ev(%[[TMPA]])
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   }
 
 // LLVM-LABEL: define dso_local void @_Z26test_ternary_both_branchesb(
@@ -301,7 +296,6 @@ int test_return_ternary(bool c) {
 // CIR:       cir.yield %[[GET_B]] : !s32i
 // CIR:     })
 // CIR:     cir.store %{{.*}}, %{{.*}} : !s32i, !cir.ptr<!s32i>
-// CIR:     cir.yield
 // CIR:   } cleanup all {
 // CIR:     %[[FLAG_B:.*]] = cir.load {{.*}} %[[ACTB]]
 // CIR:     cir.if %[[FLAG_B]] {
@@ -311,7 +305,6 @@ int test_return_ternary(bool c) {
 // CIR:     cir.if %[[FLAG_A]] {
 // CIR:       cir.call @_ZN1AD1Ev(%[[TMPA]])
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   }
 // CIR:   %[[RET:.*]] = cir.load %{{.*}} : !cir.ptr<!s32i>, !s32i
 // CIR:   cir.return %[[RET]] : !s32i
@@ -439,10 +432,8 @@ int test_false_positive_conditional(bool c) {
 // CIR:     %[[TWO:.*]] = cir.const #cir.int<2> : !s32i
 // CIR:     %[[SEL:.*]] = cir.select if %[[BOOL]] then %[[ONE]] else %[[TWO]]
 // CIR:     cir.store %[[SEL]], %{{.*}} : !s32i, !cir.ptr<!s32i>
-// CIR:     cir.yield
 // CIR:   } cleanup all {
 // CIR:     cir.call @_ZN1SD1Ev(%[[TMP]])
-// CIR:     cir.yield
 // CIR:   }
 
 // LLVM-LABEL: define dso_local noundef i32 @_Z31test_false_positive_conditionalb(
@@ -531,10 +522,8 @@ void test_nested_ewc(bool c1, bool c2) {
 // Copy s into ref.tmp; destroy s on all paths (normal + EH).
 // CIR:     cir.cleanup.scope {
 // CIR:       cir.call @_ZN1TC1ERKS_(%[[REF_TMP]], %[[S]])
-// CIR:       cir.yield
 // CIR:     } cleanup all {
 // CIR:       cir.call @_ZN1TD1Ev(%[[S]])
-// CIR:       cir.yield
 // CIR:     }
 // CIR:   }
 // Outer cleanup scope: operator bool() + outer ternary + destroys ref.tmp.
@@ -553,17 +542,13 @@ void test_nested_ewc(bool c1, bool c2) {
 // CIR:       %[[FIVE:.*]] = cir.const #cir.int<5> : !s32i
 // CIR:       cir.call @_ZN1TC1Ei(%[[RESULT]], %[[FIVE]])
 // CIR:     }
-// CIR:     cir.yield
 // CIR:   } cleanup all {
 // CIR:     cir.call @_ZN1TD1Ev(%[[REF_TMP]])
-// CIR:     cir.yield
 // CIR:   }
 // result destructor.
 // CIR:   cir.cleanup.scope {
-// CIR:     cir.yield
 // CIR:   } cleanup all {
 // CIR:     cir.call @_ZN1TD1Ev(%[[RESULT]])
-// CIR:     cir.yield
 // CIR:   }
 
 // LLVM-LABEL: define dso_local void @_Z15test_nested_ewcbb(

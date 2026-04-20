@@ -54,7 +54,6 @@ struct Struct {
     // CHECK-NEXT: %[[ENTER:.*]] = acc.declare_enter dataOperands(%[[ARG_HSE_COPYIN]], %[[ARG_INT_COPYIN]], %[[LOC_HSE_COPYIN]], %[[LOC_INT_COPYIN]], %[[ARG_HSE_PTR_COPYIN]], %[[LOC_HSE_ARR_COPYIN]] : !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!cir.ptr<!rec_HasSideEffects>>, !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>)
     //
     // CHECK-NEXT: cir.cleanup.scope {
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: } cleanup normal {
     // CHECK-NEXT:   acc.declare_exit token(%[[ENTER]]) dataOperands(%[[ARG_HSE_COPYIN]], %[[ARG_INT_COPYIN]], %[[LOC_HSE_COPYIN]], %[[LOC_INT_COPYIN]], %[[ARG_HSE_PTR_COPYIN]], %[[LOC_HSE_ARR_COPYIN]] : !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!cir.ptr<!rec_HasSideEffects>>, !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>)
     // CHECK-NEXT:   acc.copyout accPtr(%[[ARG_HSE_COPYIN]] : !cir.ptr<!rec_HasSideEffects>) to varPtr(%[[ARG_HSE_ALLOCA]] : !cir.ptr<!rec_HasSideEffects>) {dataClause = #acc<data_clause acc_copy>, modifiers = #acc<data_clause_modifier always>, name = "ArgHSE"}
@@ -63,7 +62,6 @@ struct Struct {
     // CHECK-NEXT:   acc.copyout accPtr(%[[LOC_INT_COPYIN]] : !cir.ptr<!s32i>) to varPtr(%[[LOC_INT_ALLOCA]] : !cir.ptr<!s32i>) {dataClause = #acc<data_clause acc_copy>, modifiers = #acc<data_clause_modifier always>, name = "LocalInt"}
     // CHECK-NEXT:   acc.copyout accPtr(%[[ARG_HSE_PTR_COPYIN]] : !cir.ptr<!cir.ptr<!rec_HasSideEffects>>) bounds(%[[BOUND1]]) to varPtr(%[[ARG_HSE_PTR_ALLOCA]] : !cir.ptr<!cir.ptr<!rec_HasSideEffects>>) {dataClause = #acc<data_clause acc_copy>, modifiers = #acc<data_clause_modifier always>, name = "ArgHSEPtr[1:1]"}
     // CHECK-NEXT:   acc.copyout accPtr(%[[LOC_HSE_ARR_COPYIN]] : !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>) bounds(%[[BOUND2]]) to varPtr(%[[LOC_HSE_ARR_ALLOCA]] : !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>) {dataClause = #acc<data_clause acc_copy>, modifiers = #acc<data_clause_modifier always>, name = "LocalHSEArr[1:1]"}
-    // CHECK-NEXT:   cir.yield
     // CHRCK-NEXT: }
   }
   void MemFunc2(HasSideEffects ArgHSE, int ArgInt, HasSideEffects *ArgHSEPtr);
@@ -123,23 +121,19 @@ void Struct::MemFunc2(HasSideEffects ArgHSE, int ArgInt, HasSideEffects *ArgHSEP
     // CHECK-NEXT:   %[[ENTER2:.*]] = acc.declare_enter dataOperands(%[[LOC_HSE_COPYIN]], %[[LOC_INT_COPYIN]], %[[LOC_HSE_ARR_COPYIN]] : !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>)
 
     // CHECK-NEXT:   cir.cleanup.scope {
-    // CHECK-NEXT:     cir.yield
     // CHECK-NEXT:   } cleanup normal {
     // CHECK-NEXT:     acc.declare_exit token(%[[ENTER2]]) dataOperands(%[[LOC_HSE_COPYIN]], %[[LOC_INT_COPYIN]], %[[LOC_HSE_ARR_COPYIN]] : !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>)
     // CHECK-NEXT:     acc.copyout accPtr(%[[LOC_HSE_COPYIN]] : !cir.ptr<!rec_HasSideEffects>) to varPtr(%[[LOC_HSE_ALLOCA]] : !cir.ptr<!rec_HasSideEffects>) {dataClause = #acc<data_clause acc_copy>, modifiers = #acc<data_clause_modifier alwaysout>, name = "LocalHSE"}
     // CHECK-NEXT:     acc.copyout accPtr(%[[LOC_INT_COPYIN]] : !cir.ptr<!s32i>) to varPtr(%[[LOC_INT_ALLOCA]] : !cir.ptr<!s32i>) {dataClause = #acc<data_clause acc_copy>, modifiers = #acc<data_clause_modifier alwaysout>, name = "LocalInt"}
     // CHECK-NEXT:     acc.copyout accPtr(%[[LOC_HSE_ARR_COPYIN]] : !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>) bounds(%[[BOUND2]]) to varPtr(%[[LOC_HSE_ARR_ALLOCA]] : !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>) {dataClause = #acc<data_clause acc_copy>, modifiers = #acc<data_clause_modifier alwaysout>, name = "LocalHSEArr[1:1]"}
-    // CHECK-NEXT:     cir.yield
     // CHECK-NEXT:   }
 
-    // CHECK-NEXT:   cir.yield
 
     // CHECK-NEXT: } cleanup normal {
     // CHECK-NEXT:   acc.declare_exit token(%[[ENTER1]]) dataOperands(%[[ARG_HSE_COPYIN]], %[[ARG_INT_COPYIN]], %[[ARG_HSE_PTR_COPYIN]] : !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!cir.ptr<!rec_HasSideEffects>>)
     // CHECK-NEXT:   acc.copyout accPtr(%[[ARG_HSE_COPYIN]] : !cir.ptr<!rec_HasSideEffects>) to varPtr(%[[ARG_HSE_ALLOCA]] : !cir.ptr<!rec_HasSideEffects>) {dataClause = #acc<data_clause acc_copy>, modifiers = #acc<data_clause_modifier alwaysin>, name = "ArgHSE"}
     // CHECK-NEXT:   acc.copyout accPtr(%[[ARG_INT_COPYIN]] : !cir.ptr<!s32i>) to varPtr(%[[ARG_INT_ALLOCA]] : !cir.ptr<!s32i>) {dataClause = #acc<data_clause acc_copy>, modifiers = #acc<data_clause_modifier alwaysin>, name = "ArgInt"}
     // CHECK-NEXT:   acc.copyout accPtr(%[[ARG_HSE_PTR_COPYIN]] : !cir.ptr<!cir.ptr<!rec_HasSideEffects>>) bounds(%[[BOUND1]]) to varPtr(%[[ARG_HSE_PTR_ALLOCA]] : !cir.ptr<!cir.ptr<!rec_HasSideEffects>>) {dataClause = #acc<data_clause acc_copy>, modifiers = #acc<data_clause_modifier alwaysin>, name = "ArgHSEPtr[1:1]"}
-    // CHECK-NEXT:   cir.yield
     // CHECK-NEXT: }
 }
 
@@ -195,13 +189,11 @@ extern "C" void NormalFunc(HasSideEffects ArgHSE, int ArgInt, HasSideEffects *Ar
     do_thing();
     // CHECK-NEXT:     cir.cleanup.scope {
     // CHECK-NEXT:       cir.call @do_thing
-    // CHECK-NEXT:       cir.yield
     // CHECK-NEXT:     } cleanup normal {
     // CHECK-NEXT:       acc.declare_exit token(%[[ENTER2]]) dataOperands(%[[LOC_HSE_COPYIN]], %[[LOC_INT_COPYIN]], %[[LOC_HSE_ARR_COPYIN]] : !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>)
     // CHECK-NEXT:       acc.copyout accPtr(%[[LOC_HSE_COPYIN]] : !cir.ptr<!rec_HasSideEffects>) to varPtr(%[[LOC_HSE_ALLOCA]] : !cir.ptr<!rec_HasSideEffects>) {dataClause = #acc<data_clause acc_copy>, name = "LocalHSE"}
     // CHECK-NEXT:       acc.copyout accPtr(%[[LOC_INT_COPYIN]] : !cir.ptr<!s32i>) to varPtr(%[[LOC_INT_ALLOCA]] : !cir.ptr<!s32i>) {dataClause = #acc<data_clause acc_copy>, name = "LocalInt"}
     // CHECK-NEXT:       acc.copyout accPtr(%[[LOC_HSE_ARR_COPYIN]] : !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>) bounds(%[[BOUND2]]) to varPtr(%[[LOC_HSE_ARR_ALLOCA]] : !cir.ptr<!cir.array<!rec_HasSideEffects x 5>>) {dataClause = #acc<data_clause acc_copy>, name = "LocalHSEArr[1:1]"}
-    // CHECK-NEXT:       cir.yield
     // CHECK-NEXT:     }
     }
     // CHECK-NEXT: }
@@ -209,12 +201,10 @@ extern "C" void NormalFunc(HasSideEffects ArgHSE, int ArgInt, HasSideEffects *Ar
     // Make sure that cleanup gets put in the right scope.
     do_thing();
     // CHECK-NEXT: cir.call @do_thing
-    // CHECK-NEXT: cir.yield
     // CHECK-NEXT: cleanup normal {
     // CHECK-NEXT:   acc.declare_exit token(%[[ENTER1]]) dataOperands(%[[ARG_HSE_COPYIN]], %[[ARG_INT_COPYIN]], %[[ARG_HSE_PTR_COPYIN]] : !cir.ptr<!rec_HasSideEffects>, !cir.ptr<!s32i>, !cir.ptr<!cir.ptr<!rec_HasSideEffects>>)
     // CHECK-NEXT:   acc.copyout accPtr(%[[ARG_HSE_COPYIN]] : !cir.ptr<!rec_HasSideEffects>) to varPtr(%[[ARG_HSE_ALLOCA]] : !cir.ptr<!rec_HasSideEffects>) {dataClause = #acc<data_clause acc_copy>, modifiers = #acc<data_clause_modifier capture>, name = "ArgHSE"}
     // CHECK-NEXT:   acc.copyout accPtr(%[[ARG_INT_COPYIN]] : !cir.ptr<!s32i>) to varPtr(%[[ARG_INT_ALLOCA]] : !cir.ptr<!s32i>) {dataClause = #acc<data_clause acc_copy>, modifiers = #acc<data_clause_modifier capture>, name = "ArgInt"}
     // CHECK-NEXT:   acc.copyout accPtr(%[[ARG_HSE_PTR_COPYIN]] : !cir.ptr<!cir.ptr<!rec_HasSideEffects>>) bounds(%[[BOUND1]]) to varPtr(%[[ARG_HSE_PTR_ALLOCA]] : !cir.ptr<!cir.ptr<!rec_HasSideEffects>>) {dataClause = #acc<data_clause acc_copy>, modifiers = #acc<data_clause_modifier capture>, name = "ArgHSEPtr[1:1]"}
-    // CHECK-NEXT:   cir.yield
 }
 

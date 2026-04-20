@@ -58,10 +58,9 @@ inline OwningOpRef<ContainerOpT> constructContainerOpForParserIfNecessary(
     static_assert(
         ContainerOpT::template hasTrait<OpTrait::OneRegion>() &&
             (ContainerOpT::template hasTrait<OpTrait::NoTerminator>() ||
-             OpTrait::template hasSingleBlockImplicitTerminator<
-                 ContainerOpT>::value),
-        "Expected `ContainerOpT` to have a single region with a single "
-        "block that has an implicit terminator or does not require one");
+             OpTrait::template hasImplicitTerminator<ContainerOpT>::value),
+        "Expected `ContainerOpT` to have a single region with an implicit "
+        "terminator or that does not require one");
 
     OpBuilder builder(context);
     ContainerOpT op = ContainerOpT::create(builder, sourceFileLoc);

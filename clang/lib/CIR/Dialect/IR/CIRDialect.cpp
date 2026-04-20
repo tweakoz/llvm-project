@@ -197,16 +197,6 @@ static LogicalResult ensureRegionTerm(OpAsmParser &parser, Region &region,
   return success();
 }
 
-// True if the region's terminator should be omitted.
-static bool omitRegionTerm(mlir::Region &r) {
-  const auto singleNonEmptyBlock = r.hasOneBlock() && !r.back().empty();
-  const auto yieldsNothing = [&r]() {
-    auto y = dyn_cast<cir::YieldOp>(r.back().getTerminator());
-    return y && y.getArgs().empty();
-  };
-  return singleNonEmptyBlock && yieldsNothing();
-}
-
 //===----------------------------------------------------------------------===//
 // InlineKindAttr (FIXME: remove once FuncOp uses assembly format)
 //===----------------------------------------------------------------------===//
@@ -246,23 +236,6 @@ void printInlineKindAttr(OpAsmPrinter &p, cir::InlineKindAttr inlineKindAttr) {
 // CIR Custom Parsers/Printers
 //===----------------------------------------------------------------------===//
 
-static mlir::ParseResult parseOmittedTerminatorRegion(mlir::OpAsmParser &parser,
-                                                      mlir::Region &region) {
-  auto regionLoc = parser.getCurrentLocation();
-  if (parser.parseRegion(region))
-    return failure();
-  if (ensureRegionTerm(parser, region, regionLoc).failed())
-    return failure();
-  return success();
-}
-
-static void printOmittedTerminatorRegion(mlir::OpAsmPrinter &printer,
-                                         cir::ScopeOp &op,
-                                         mlir::Region &region) {
-  printer.printRegion(region,
-                      /*printEntryBlockArgs=*/false,
-                      /*printBlockTerminators=*/!omitRegionTerm(region));
-}
 
 mlir::OptionalParseResult
 parseGlobalAddressSpaceValue(mlir::AsmParser &p,
@@ -1250,20 +1223,15 @@ ParseResult cir::IfOp::parse(OpAsmParser &parser, OperationState &result) {
     return failure();
 
   // Parse 'then' region.
-  mlir::SMLoc parseThenLoc = parser.getCurrentLocation();
   if (parser.parseRegion(*thenRegion, /*arguments=*/{}, /*argTypes=*/{}))
     return failure();
-
-  if (ensureRegionTerm(parser, *thenRegion, parseThenLoc).failed())
-    return failure();
+  ensureTerminator(*thenRegion, parser.getBuilder(), result.location);
 
   // If we find an 'else' keyword, parse the 'else' region.
   if (!parser.parseOptionalKeyword("else")) {
-    mlir::SMLoc parseElseLoc = parser.getCurrentLocation();
     if (parser.parseRegion(*elseRegion, /*arguments=*/{}, /*argTypes=*/{}))
       return failure();
-    if (ensureRegionTerm(parser, *elseRegion, parseElseLoc).failed())
-      return failure();
+    ensureTerminator(*elseRegion, parser.getBuilder(), result.location);
   }
 
   // Parse the optional attribute list.
@@ -1272,12 +1240,21 @@ ParseResult cir::IfOp::parse(OpAsmParser &parser, OperationState &result) {
   return success();
 }
 
+/// True if the region's implicit terminator should be omitted from printing.
+static bool omitImplicitTerminator(mlir::Region &r) {
+  if (!r.hasOneBlock() || r.back().empty())
+    return false;
+  auto *term = r.back().getTerminator();
+  return mlir::isa<cir::YieldOp>(term) && term->getNumOperands() == 0 &&
+         term->getAttrDictionary().empty();
+}
+
 void cir::IfOp::print(OpAsmPrinter &p) {
   p << " " << getCondition() << " ";
   mlir::Region &thenRegion = this->getThenRegion();
   p.printRegion(thenRegion,
                 /*printEntryBlockArgs=*/false,
-                /*printBlockTerminators=*/!omitRegionTerm(thenRegion));
+                /*printBlockTerminators=*/!omitImplicitTerminator(thenRegion));
 
   // Print the 'else' regions if it exists and has a block.
   mlir::Region &elseRegion = this->getElseRegion();
@@ -1285,7 +1262,8 @@ void cir::IfOp::print(OpAsmPrinter &p) {
     p << " else ";
     p.printRegion(elseRegion,
                   /*printEntryBlockArgs=*/false,
-                  /*printBlockTerminators=*/!omitRegionTerm(elseRegion));
+                  /*printBlockTerminators=*/
+                  !omitImplicitTerminator(elseRegion));
   }
 
   p.printOptionalAttrDict(getOperation()->getAttrs());
