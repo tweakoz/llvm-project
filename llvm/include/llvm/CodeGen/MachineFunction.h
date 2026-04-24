@@ -129,6 +129,7 @@ struct LLVM_ABI MachineFunctionInfo {
       const {
     return nullptr;
   }
+
 };
 
 /// Properties which a MachineFunction may have at a given point in time.
@@ -901,12 +902,7 @@ public:
 
   MachineFunctionInfo *cloneInfoFrom(
       const MachineFunction &OrigMF,
-      const DenseMap<MachineBasicBlock *, MachineBasicBlock *> &Src2DstMBB) {
-    assert(!MFInfo && "new function already has MachineFunctionInfo");
-    if (!OrigMF.MFInfo)
-      return nullptr;
-    return OrigMF.MFInfo->clone(Allocator, *this, Src2DstMBB);
-  }
+      const DenseMap<MachineBasicBlock *, MachineBasicBlock *> &Src2DstMBB);
 
   /// Returns the denormal handling type for the default rounding mode of the
   /// function.
