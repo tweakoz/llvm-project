@@ -5365,6 +5365,23 @@ llvm::Constant *CodeGenModule::GetOrCreateLLVMFunction(
 
   // Lookup the entry, lazily creating it if necessary.
   llvm::GlobalValue *Entry = GetGlobalValue(MangledName);
+  auto DeferDefinitionIfBodyIsAvailable = [&] {
+    const auto *DAsFunction = dyn_cast_or_null<FunctionDecl>(D);
+    if (!getLangOpts().CPlusPlus || !DAsFunction)
+      return;
+
+    // Look for a declaration that's lexically in a record.
+    for (const auto *FD = DAsFunction->getMostRecentDecl(); FD;
+         FD = FD->getPreviousDecl()) {
+      if (isa<CXXRecordDecl>(FD->getLexicalDeclContext()) &&
+          FD->doesThisDeclarationHaveABody()) {
+        GlobalDecl DefGD = GD.getWithDecl(FD);
+        if (!llvm::is_contained(DeferredDeclsToEmit, DefGD))
+          addDeferredDeclToEmit(DefGD);
+        break;
+      }
+    }
+  };
   if (Entry) {
     if (WeakRefReferences.erase(Entry)) {
       const FunctionDecl *FD = cast_or_null<FunctionDecl>(D);
@@ -5397,6 +5414,11 @@ llvm::Constant *CodeGenModule::GetOrCreateLLVMFunction(
 
     if ((isa<llvm::Function>(Entry) || isa<llvm::GlobalAlias>(Entry)) &&
         (Entry->getValueType() == Ty)) {
+      // The LLVM declaration can be created before Sema synthesizes the body
+      // for an inline member, for example an implicit destructor. If this is a
+      // later reference after the body became available, queue it for emission.
+      if (!DontDefer && !IsForDefinition && Entry->isDeclaration())
+        DeferDefinitionIfBodyIsAvailable();
       return Entry;
     }
 
@@ -5492,16 +5514,7 @@ llvm::Constant *CodeGenModule::GetOrCreateLLVMFunction(
       // We also don't emit a definition for a function if it's going to be an
       // entry in a vtable, unless it's already marked as used.
     } else if (getLangOpts().CPlusPlus && D) {
-      // Look for a declaration that's lexically in a record.
-      for (const auto *FD = cast<FunctionDecl>(D)->getMostRecentDecl(); FD;
-           FD = FD->getPreviousDecl()) {
-        if (isa<CXXRecordDecl>(FD->getLexicalDeclContext())) {
-          if (FD->doesThisDeclarationHaveABody()) {
-            addDeferredDeclToEmit(GD.getWithDecl(FD));
-            break;
-          }
-        }
-      }
+      DeferDefinitionIfBodyIsAvailable();
     }
   }
 
