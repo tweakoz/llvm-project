@@ -3020,9 +3020,13 @@ def fir_VolatileCastOp : fir_SimpleOneResultOp<"volatile_cast", [Pure]> {
 }
 
 def fir_ConvertOp
-    : fir_SimpleOneResultOp<"convert", [NoMemoryEffect, ViewLikeOpInterface,
-                                        ConditionallySpeculatable,
-                                        fir_FortranObjectViewOpInterface]> {
+    : fir_SimpleOneResultOp<"convert",
+                            [NoMemoryEffect, ViewLikeOpInterface,
+                             ConditionallySpeculatable,
+                             DeclareOpInterfaceMethods<PromotableOpInterface,
+                                                       ["getPromotableSlotView",
+                                                        "convertSlotValue"]>,
+                             fir_FortranObjectViewOpInterface]> {
   let summary = "encapsulates all Fortran entity type conversions";
 
   let description = [{
@@ -3544,7 +3548,8 @@ def fir_DeclareOp
                          DeclareOpInterfaceMethods<
                              fir_FortranVariableStorageOpInterface>,
                          DeclareOpInterfaceMethods<PromotableOpInterface,
-                                                   ["requiresReplacedValues",
+                                                   ["getPromotableSlotView",
+                                                    "requiresReplacedValues",
                                                     "visitReplacedValues"]>,
                          fir_FortranObjectViewOpInterface]> {
   let summary = "declare a variable";
