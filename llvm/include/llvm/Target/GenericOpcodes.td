@@ -1455,7 +1455,6 @@ class G_ATOMICRMW_OP : GenericInstruction {
   let hasSideEffects = false;
   let mayLoad = true;
   let mayStore = true;
-  let GISelMatchGenericTypes = 1;
 }
 
 def G_ATOMICRMW_XCHG : G_ATOMICRMW_OP;
