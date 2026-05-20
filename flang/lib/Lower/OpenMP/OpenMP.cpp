@@ -79,6 +79,25 @@ makeObjects(llvm::ArrayRef<const semantics::Symbol *> syms) {
   return objects;
 }
 
+/// Return the directive that is immediately nested inside of the given
+/// \c parent evaluation, if it is its only non-end-statement nested evaluation
+/// and it represents an OpenMP construct.
+lower::pft::Evaluation *
+extractOnlyOmpNestedEval(lower::pft::Evaluation &parent) {
+  if (!parent.hasNestedEvaluations())
+    return nullptr;
+
+  auto &nested{parent.getFirstNestedEvaluation()};
+  if (!nested.isA<parser::OpenMPConstruct>())
+    return nullptr;
+
+  for (auto &sibling : parent.getNestedEvaluations())
+    if (&sibling != &nested && !sibling.isEndStmt())
+      return nullptr;
+
+  return &nested;
+}
+
 namespace {
 /// Structure holding information that is needed to pass host-evaluated
 /// information to later lowering stages.
@@ -307,25 +326,6 @@ private:
       processEval(*nestedEval);
       dirsToProcess = prevDirs;
     }
-  }
-
-  /// Return the directive that is immediately nested inside of the given
-  /// \c parent evaluation, if it is its only non-end-statement nested
-  /// evaluation and it represents an OpenMP construct.
-  lower::pft::Evaluation *
-  extractOnlyOmpNestedEval(lower::pft::Evaluation &parent) {
-    if (!parent.hasNestedEvaluations())
-      return nullptr;
-
-    auto &nested{parent.getFirstNestedEvaluation()};
-    if (!nested.isA<parser::OpenMPConstruct>())
-      return nullptr;
-
-    for (auto &sibling : parent.getNestedEvaluations())
-      if (&sibling != &nested && !sibling.isEndStmt())
-        return nullptr;
-
-    return &nested;
   }
 
 protected:
@@ -4102,7 +4102,7 @@ static void genOMPDispatch(lower::AbstractConverter &converter,
     // Lowered in the enclosing genSectionsOp.
     break;
   case llvm::omp::Directive::OMPD_sections:
-    genSectionsOp(converter, symTable, semaCtx, eval, loc, queue, item);
+    newOp = genSectionsOp(converter, symTable, semaCtx, eval, loc, queue, item);
     break;
   case llvm::omp::Directive::OMPD_simd:
     newOp =
@@ -4189,6 +4189,42 @@ static void genOMPDispatch(lower::AbstractConverter &converter,
   finalizeStmtCtx();
   if (loopLeaf)
     symTable.popScope();
+
+  // Add the omp.combined attribute to eligible ops. In this case, all
+  // composable ops that are not loop-associated, except for the ones that can
+  // only appear as the innermost leaf construct.
+  if (!loopLeaf &&
+      llvm::isa_and_present<mlir::omp::ComposableOpInterface>(newOp) &&
+      !llvm::isa<mlir::omp::SectionsOp, mlir::omp::WorkshareOp,
+                 mlir::omp::WorkdistributeOp>(newOp)) {
+    bool isCombined = false;
+    if (std::next(item) != queue.end()) {
+      // Non-innermost leafs of a combined construct must always hold the
+      // attribute.
+      isCombined = true;
+    } else if (lower::pft::Evaluation *nestedEval =
+                   extractOnlyOmpNestedEval(eval)) {
+      // Combinable constructs that are immediately nested with no other
+      // statements or directives preventing them from being combined need the
+      // attribute as well.
+      OmpDirectiveSet combinableDirs =
+          (llvm::omp::blockConstructSet &
+           ~OmpDirectiveSet{llvm::omp::Directive::OMPD_ordered,
+                            llvm::omp::Directive::OMPD_scope,
+                            llvm::omp::Directive::OMPD_taskgroup}) |
+          (llvm::omp::loopConstructSet & ~llvm::omp::loopTransformationSet);
+      const auto &ompEval = nestedEval->get<parser::OpenMPConstruct>();
+      llvm::omp::Directive nestedDir =
+          parser::omp::GetOmpDirectiveName(ompEval).v;
+      llvm::omp::Directive firstLeafDir =
+          llvm::omp::getLeafConstructsOrSelf(nestedDir).front();
+
+      if (combinableDirs.test(firstLeafDir))
+        isCombined = true;
+    }
+    if (isCombined)
+      llvm::cast<mlir::omp::ComposableOpInterface>(newOp).setCombined(true);
+  }
 }
 
 //===----------------------------------------------------------------------===//
